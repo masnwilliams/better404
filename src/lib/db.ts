@@ -26,8 +26,9 @@ export async function query<TRecord>(text: string, params?: ReadonlyArray<PgValu
 }
 
 export function toVectorLiteral(vector: number[]): string {
-  // Format: [v1, v2, ...]
-  return `[${vector.join(",")}]`;
+  // Return a pgvector SQL literal like '[v1,v2,...]'::vector
+  // Using a string literal with an explicit ::vector cast avoids syntax errors near '['
+  return `'[${vector.join(",")}]'::vector`;
 }
 
 export default pool;
