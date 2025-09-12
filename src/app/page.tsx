@@ -7,6 +7,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [snippet, setSnippet] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [domainId, setDomainId] = useState<number | null>(null);
+  const [siteKey, setSiteKey] = useState<string | null>(null);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verified, setVerified] = useState<boolean | null>(null);
   const [copied, setCopied] = useState(false);
 
   async function submit(e: React.FormEvent) {
@@ -23,6 +27,9 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed");
       setSnippet(data.snippet);
+      setDomainId(data.id || null);
+      setSiteKey(data.siteKeyPublic || null);
+      setVerified(false);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       setError(message);
@@ -68,7 +75,46 @@ export default function Home() {
               {copied ? "Copied ✓" : "Copy"}
             </button>
           </div>
-          <textarea readOnly value={snippet} style={{ width: "100%", height: 220, fontFamily: "monospace", fontSize: 12 }} />
+          <textarea readOnly value={snippet} style={{ color: "black", width: "100%", height: 220, fontFamily: "monospace", fontSize: 12 }} />
+          {siteKey && domain && (
+            <div style={{ marginTop: 16, borderTop: "1px solid #ddd", paddingTop: 12 }}>
+              <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
+              <ol style={{ paddingLeft: 18, margin: 0 }}>
+                <li>Add a DNS TXT record:</li>
+              </ol>
+              <pre style={{ background: "#f7f7f7", padding: 12, borderRadius: 6, overflowX: "auto" }}>
+{`Name:    _404-verify.${domain}
+Type:    TXT
+Value:   ${siteKey}`}
+              </pre>
+              <p style={{ margin: "8px 0 0", opacity: 0.8 }}>Propagation can take a few minutes.</p>
+              <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!domainId) return;
+                    setVerifyLoading(true);
+                    try {
+                      const res = await fetch(`/api/v1/domains/${domainId}/verify`, { method: "POST" });
+                      const data = await res.json();
+                      if (!res.ok) throw new Error(data?.error || data?.reason || "Verify failed");
+                      setVerified(data.verified === true || data.ok === true);
+                    } catch (e: unknown) {
+                      setVerified(false);
+                    } finally {
+                      setVerifyLoading(false);
+                    }
+                  }}
+                  disabled={verifyLoading}
+                  style={{ padding: "6px 10px", fontSize: 14 }}
+                >
+                  {verifyLoading ? "Checking..." : "Check verification"}
+                </button>
+                {verified === true && <span style={{ color: "green" }}>Verified ✓</span>}
+                {verified === false && <span style={{ color: "#b00" }}>Not verified yet</span>}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </main>
