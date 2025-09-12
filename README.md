@@ -1,36 +1,207 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 404 Solver
 
-## Getting Started
+A minimal Next.js application that provides intelligent 404 page recommendations by leveraging semantic search and vector embeddings. Instead of showing dead-end 404 pages, it suggests relevant on-site content to help users find what they're looking for.
 
-First, run the development server:
+## Features
+
+- **Smart 404 Recommendations**: Show relevant pages instead of dead-end 404s
+- **Semantic Search**: Uses vector embeddings for intelligent content matching
+- **Easy Integration**: Simple JavaScript snippet for any website
+- **Real-time Indexing**: Automatically crawls and indexes content via Kernel webhooks
+- **PostgreSQL + pgvector**: Efficient vector similarity search
+- **OpenAI Embeddings**: High-quality semantic understanding
+
+## How It Works
+
+1. **Content Ingestion**: Your website content is crawled and indexed using Kernel's web scraping service
+2. **Vector Processing**: Content is chunked, embedded using OpenAI, and stored in PostgreSQL with pgvector
+3. **Smart Recommendations**: When a 404 occurs, the system performs semantic search to find relevant pages
+4. **User Experience**: A simple snippet displays helpful suggestions instead of a dead-end page
+
+## Architecture
+
+- **Frontend**: Next.js App Router with TypeScript
+- **Database**: PostgreSQL with pgvector extension for vector similarity search
+- **Embeddings**: OpenAI API for generating semantic embeddings
+- **Crawling**: Kernel API for web scraping and content ingestion
+- **Validation**: Zod for request/response validation
+
+## Quick Start
+
+### Prerequisites
+
+- Node.js 18+ and Bun
+- PostgreSQL with pgvector extension
+- OpenAI API key
+- Kernel API access
+
+### Installation
+
+1. **Clone and install dependencies**:
+   ```bash
+   git clone <repository-url>
+   cd 404-solver
+   bun install
+   ```
+
+2. **Set up environment variables**:
+   ```bash
+   cp .env.example .env.local
+   ```
+   
+   Configure the following variables:
+   ```env
+   DATABASE_URL="postgres://user:password@localhost:5432/404solver"
+   OPENAI_API_KEY="sk-..."
+   KERNEL_API_BASE_URL="https://api.onkernel.com"
+   KERNEL_API_KEY="..."
+   KERNEL_WEBHOOK_SECRET="..."
+   APP_BASE_URL="https://your-app.com"
+   SITE_KEY_SIGNING_SECRET="..."
+   RATE_LIMIT_RECS_PER_MINUTE="60"
+   TOP_N_DEFAULT="5"
+   EMBEDDING_DIM="1536"
+   ```
+
+3. **Set up the database**:
+   ```bash
+   # Run the migration to create tables and enable pgvector
+   psql $DATABASE_URL -f migrations/001_init.sql
+   ```
+
+4. **Start the development server**:
+   ```bash
+   bun dev
+   ```
+
+5. **Open your browser**:
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## API Endpoints
+
+### Public API
+
+- `POST /api/v1/recommendations` - Get 404 page recommendations
+- `GET /api/v1/status/[domain]` - Check domain indexing status
+- `POST /api/v1/domains` - Register a new domain
+- `POST /api/v1/domains/[id]/verify` - Verify domain ownership
+
+### Internal API
+
+- `POST /api/internal/kernel/webhook` - Kernel webhook for content ingestion
+
+## Integration
+
+### 1. Register Your Domain
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+curl -X POST https://your-app.com/api/v1/domains \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com"}'
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Add the Snippet to Your 404 Page
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```html
+<div id="smart-404"></div>
+<script>
+(function(){
+  const siteKey = "pk_live_xxx"; // Get this from your domain registration
+  const url = location.href;
+  const ref = document.referrer || null;
+  fetch("https://api.your-app.com/api/v1/recommendations",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({siteKey,url,referrer:ref,topN:5})
+  }).then(r=>r.json()).then(({results})=>{
+    const el=document.getElementById("smart-404");
+    if(!el||!Array.isArray(results)) return;
+    el.innerHTML=`
+      <div style="margin:16px 0">
+        <h2 style="margin:0 0 8px">Were you looking for one of these?</h2>
+        <ul style="list-style:none;padding:0;margin:0;display:grid;gap:8px">
+          ${results.map(r=>`<li><a href="${r.url}">${r.title||r.url}</a><div style="opacity:.7">${r.snippet||""}</div></li>`).join("")}
+        </ul>
+      </div>`;
+  }).catch(()=>{});
+})();
+</script>
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Start Content Crawling
 
-## Learn More
+```bash
+curl -X POST https://api.onkernel.com/v1/scrape \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $KERNEL_API_KEY" \
+  -d '{
+    "domain": "example.com",
+    "webhookUrl": "https://your-app.com/api/internal/kernel/webhook"
+  }'
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Database Schema
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The application uses PostgreSQL with the following key tables:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `domains` - Registered domains and their settings
+- `pages` - Crawled pages with metadata
+- `chunks` - Text chunks with vector embeddings
+- `recommendation_events` - Analytics for recommendations
+- `blocklist_rules` - URL patterns to exclude
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+  app/
+    api/
+      v1/                    # Public API endpoints
+      internal/              # Internal webhooks
+  lib/
+    db.ts                   # Database client and helpers
+    embeddings.ts           # Embedding provider wrapper
+    ranking.ts              # Search ranking logic
+    auth.ts                 # Authentication and validation
+    validation.ts           # Zod schemas
+    urls.ts                 # URL normalization
+migrations/
+  001_init.sql             # Database schema
+```
+
+### Running Tests
+
+```bash
+bun test
+```
+
+### Building for Production
+
+```bash
+bun run build
+```
+
+## Security
+
+- **Origin Validation**: Checks that requests come from verified domains
+- **HMAC Verification**: Kernel webhooks are verified using HMAC signatures
+- **Rate Limiting**: Configurable rate limits for API endpoints
+- **No PII Storage**: Only stores public content and metadata
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For questions and support, please open an issue on GitHub or contact the development team.
