@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { siGithub, siX } from "simple-icons";
+import { Copy, Check } from "lucide-react";
 import { buildSnippet } from "@/lib/kernel";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [domain, setDomain] = useState("");
@@ -22,6 +24,21 @@ export default function Home() {
     pagesIndexed?: number;
     lastCrawledAt?: string | null;
   } | null>(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Detect theme on client side
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    };
+    
+    checkTheme();
+    
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', checkTheme);
+    
+    return () => mediaQuery.removeEventListener('change', checkTheme);
+  }, []);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -114,19 +131,19 @@ export default function Home() {
   }, [domain]);
 
   return (
-    <main style={{ padding: 16, maxWidth: 800, margin: "20px auto", color: "#e8e8e8", borderRadius: 8 }}>
+    <main className={styles.container}>
       <h1>Better404</h1>
       <p>Enter your domain to kick off indexing and get your 404 snippet.</p>
-      <form onSubmit={submit} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
+      <form onSubmit={submit} className={styles.form}>
         <input
           type="text"
           placeholder="example.com"
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
-          style={{ flex: 1, padding: "8px 12px", fontSize: 16 }}
+          className={styles.input}
           required
         />
-        <button type="submit" disabled={loading} style={{ padding: "8px 14px", fontSize: 16 }}>
+        <button type="submit" disabled={loading} className={styles.button}>
           {loading 
             ? "Checking..." 
             : domainStatus?.verified 
@@ -138,7 +155,7 @@ export default function Home() {
         </button>
       </form>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
-        <p style={{ margin: 0, fontSize: 13, opacity: 0.9 }}>
+        <p className={styles.statusText}>
           {domain && (checkingStatus 
             ? "Checking status..." 
             : domainStatus?.verified 
@@ -152,50 +169,40 @@ export default function Home() {
           href="https://onkernel.com"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "flex-end",
-            gap: 6,
-            fontSize: 13,
-            opacity: 0.85,
-            textDecoration: "none",
-            color: "inherit",
-            transition: "opacity 0.2s ease"
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = "0.85"}
+          className={styles.poweredBy}
         >
           <span style={{ lineHeight: 1, verticalAlign: "bottom" }}>powered by</span>
           <Image 
-            src="/kernel_logo.svg" 
+            src={isDarkMode ? "/kernel_logo_light.svg" : "/kernel_logo_dark.svg"} 
             alt="Kernel" 
             height={16}
             width={70}
+            className={styles.logo}
           />
         </a>
       </div>
-      {error && <p style={{ color: "#ff6b6b", marginTop: 12 }}>{error}</p>}
+      {error && <p className={styles.error}>{error}</p>}
       {!verified && siteKey && (
-        <div style={{ marginTop: 24, padding: 16, background: "rgba(255, 193, 7, 0.1)", border: "1px solid rgba(255, 193, 7, 0.3)", borderRadius: 8 }}>
-          <h3 style={{ margin: "0 0 8px 0", color: "#ffc107" }}>Domain Not Verified</h3>
-          <p style={{ margin: "0 0 12px 0", opacity: 0.9 }}>
+        <div className={styles.warningCard}>
+          <h3 className={styles.warningTitle}>Domain Not Verified</h3>
+          <p className={styles.warningText}>
             You need to verify domain ownership before getting your snippet. Add the DNS record below and click Check Verification.
           </p>
         </div>
       )}
       {siteKey && domain && !verified && (
-        <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 12 }}>
-          <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
-          <ol style={{ paddingLeft: 18, margin: 0 }}>
+        <div className={styles.verifySection}>
+          <h3 className={styles.verifyTitle}>Verify your domain</h3>
+          <ol className={styles.verifySteps}>
             <li>Add a DNS TXT record:</li>
           </ol>
-          <pre style={{ background: "#f7f7f7", color: "#111111", padding: 12, borderRadius: 6, overflowX: "auto" }}>
+          <pre className={styles.codeBlock}>
 {`Host:    _better404
 Type:    TXT
 Value:   ${siteKey}`}
           </pre>
-          <p style={{ margin: "8px 0 0", opacity: 0.8 }}>Propagation can take a few minutes.</p>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
+          <p className={styles.propagationNote}>Propagation can take a few minutes.</p>
+          <div className={styles.verifyActions}>
             <button
               type="button"
               onClick={async () => {
@@ -220,11 +227,11 @@ Value:   ${siteKey}`}
                 }
               }}
               disabled={verifyLoading}
-              style={{ padding: "6px 10px", fontSize: 14 }}
+              className={styles.verifyButton}
             >
               {verifyLoading ? "Checking..." : "Check verification"}
             </button>
-            <span style={{ color: verified ? "#22c55e" : "#b00" }}>
+            <span className={`${styles.verifyStatus} ${verified ? '' : 'error'}`}>
               {verified ? "✓ Verified!" : "Not verified yet"}
             </span>
           </div>
@@ -232,13 +239,46 @@ Value:   ${siteKey}`}
       )}
       {snippets && (
         <div style={{ marginTop: 24 }}>
-          <div style={{ marginBottom: 16, padding: 12, background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.3)", borderRadius: 6 }}>
-            <p style={{ margin: 0, color: "#22c55e", fontSize: 14 }}>
+          <div className={styles.successCard}>
+            <p className={styles.successText}>
               ✓ Domain verified! Your snippet is ready to use.
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <h3 style={{ margin: 0 }}>Paste this into your 404 page</h3>
+          <h3 className={styles.snippetTitle}>Paste this into your 404 page</h3>
+          
+          {/* Tab buttons */}
+          <div className={styles.tabsContainer}>
+            <div className={styles.tabs}>
+              <button
+                type="button"
+                onClick={() => setActiveTab('react')}
+                className={`${styles.tab} ${activeTab === 'react' ? styles.tabActive : ''}`}
+              >
+                React
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('html')}
+                className={`${styles.tab} ${activeTab === 'html' ? styles.tabActive : ''}`}
+              >
+                HTML
+              </button>
+            </div>
+          </div>
+          
+          <p className={styles.tabDescription}>
+            {activeTab === 'html' 
+              ? "HTML snippet: Copy and paste directly into your 404 page HTML" 
+              : "React component: Import and use in your React 404 page"
+            }
+          </p>
+          
+          <div className={styles.textareaContainer}>
+            <textarea 
+              readOnly 
+              value={activeTab === 'html' ? snippets.html : snippets.react} 
+              className={styles.textarea}
+            />
             <button
               type="button"
               onClick={async () => {
@@ -250,71 +290,12 @@ Value:   ${siteKey}`}
                 } catch {}
               }}
               disabled={!snippets}
-              style={{ padding: "6px 10px", fontSize: 14 }}
+              className={styles.copyIconButton}
+              title={copied ? "Copied!" : "Copy to clipboard"}
             >
-              {copied ? "Copied ✓" : "Copy"}
+              {copied ? <Check size={16} /> : <Copy size={16} />}
             </button>
           </div>
-          
-          {/* Tab buttons */}
-          <div style={{ display: "flex", gap: 0, marginBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
-            <button
-              type="button"
-              onClick={() => setActiveTab('react')}
-              style={{
-                padding: "8px 16px",
-                fontSize: 14,
-                background: activeTab === 'react' ? "rgba(255,255,255,0.1)" : "transparent",
-                border: "none",
-                color: activeTab === 'react' ? "#fff" : "rgba(255,255,255,0.7)",
-                cursor: "pointer",
-                borderBottom: activeTab === 'react' ? "2px solid #fff" : "2px solid transparent",
-                transition: "all 0.2s ease"
-              }}
-            >
-              React
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('html')}
-              style={{
-                padding: "8px 16px",
-                fontSize: 14,
-                background: activeTab === 'html' ? "rgba(255,255,255,0.1)" : "transparent",
-                border: "none",
-                color: activeTab === 'html' ? "#fff" : "rgba(255,255,255,0.7)",
-                cursor: "pointer",
-                borderBottom: activeTab === 'html' ? "2px solid #fff" : "2px solid transparent",
-                transition: "all 0.2s ease"
-              }}
-            >
-              HTML
-            </button>
-          </div>
-          
-          <p style={{ margin: "0 0 12px 0", fontSize: 13, opacity: 0.8 }}>
-            {activeTab === 'html' 
-              ? "HTML snippet: Copy and paste directly into your 404 page HTML" 
-              : "React component: Import and use in your React 404 page"
-            }
-          </p>
-          
-          <textarea 
-            readOnly 
-            value={activeTab === 'html' ? snippets.html : snippets.react} 
-            style={{ 
-              background: "#ffffff", 
-              color: "#111111", 
-              width: "100%", 
-              height: 300, 
-              fontFamily: "monospace", 
-              fontSize: 12, 
-              borderRadius: 6, 
-              padding: 12,
-              border: "1px solid #ddd",
-              resize: "vertical"
-            }} 
-          />
           {siteKey && domain && !verified && (
             <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 12 }}>
               <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
@@ -357,28 +338,13 @@ Value:   ${siteKey}`}
       )}
       
       {/* Social links */}
-      <div style={{ 
-        marginTop: 40, 
-        paddingTop: 20, 
-        borderTop: "1px solid rgba(255,255,255,0.1)", 
-        textAlign: "center" 
-      }}>
-        <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap" }}>
+      <div className={styles.socialSection}>
+        <div className={styles.socialLinks}>
           <a
             href="https://github.com/masnwilliams/better404"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              color: "rgba(255,255,255,0.7)",
-              textDecoration: "none",
-              fontSize: 14,
-              transition: "color 0.2s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
-            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
+            className={styles.socialLink}
           >
             <svg
               width="18"
@@ -394,17 +360,7 @@ Value:   ${siteKey}`}
             href="https://x.com/masnwilliams"
             target="_blank"
             rel="noopener noreferrer"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              color: "rgba(255,255,255,0.7)",
-              textDecoration: "none",
-              fontSize: 14,
-              transition: "color 0.2s ease"
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
-            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
+            className={styles.socialLink}
           >
             <svg
               width="18"

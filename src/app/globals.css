@@ -1,12 +1,70 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --card-background: #f8f9fa;
+  --card-border: #e9ecef;
+  --text-primary: #171717;
+  --text-secondary: #6c757d;
+  --text-muted: #adb5bd;
+  --success-bg: rgba(34, 197, 94, 0.1);
+  --success-border: rgba(34, 197, 94, 0.3);
+  --success-text: #22c55e;
+  --warning-bg: rgba(255, 193, 7, 0.1);
+  --warning-border: rgba(255, 193, 7, 0.3);
+  --warning-text: #ffc107;
+  --error-text: #ff6b6b;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-light: rgba(0, 0, 0, 0.05);
+  --input-background: #ffffff;
+  --input-border: #ced4da;
+  --button-primary: #171717;
+  --button-primary-hover: #383838;
+  --button-secondary: transparent;
+  --button-secondary-hover: #f2f2f2;
+  --button-secondary-border: rgba(0, 0, 0, 0.1);
+  --tab-active-bg: rgba(0, 0, 0, 0.12);
+  --tab-inactive-color: rgba(0, 0, 0, 0.5);
+  --code-background: #171717;
+  --code-text: #f7f7f7;
+  --code-hover-bg: #1f1f1f;
+  --code-hover-border: #262626;
+  --link-color: rgba(0, 0, 0, 0.7);
+  --link-hover: #000000;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --card-background: #1a1a1a;
+    --card-border: #333333;
+    --text-primary: #ededed;
+    --text-secondary: #a0a0a0;
+    --text-muted: #666666;
+    --success-bg: rgba(34, 197, 94, 0.1);
+    --success-border: rgba(34, 197, 94, 0.3);
+    --success-text: #22c55e;
+    --warning-bg: rgba(255, 193, 7, 0.1);
+    --warning-border: rgba(255, 193, 7, 0.3);
+    --warning-text: #ffc107;
+    --error-text: #ff6b6b;
+    --border-color: rgba(255, 255, 255, 0.15);
+    --border-light: rgba(255, 255, 255, 0.1);
+    --input-background: #1a1a1a;
+    --input-border: #333333;
+    --button-primary: #d9d9d9;
+    --button-primary-hover: #a1a1a1;
+    --button-secondary: transparent;
+    --button-secondary-hover: #1a1a1a;
+    --button-secondary-border: rgba(255, 255, 255, 0.2);
+    --tab-active-bg: rgba(255, 255, 255, 0.18);
+    --tab-inactive-color: rgba(255, 255, 255, 0.6);
+    --code-background: #d9d9d9;
+    --code-text: #111111;
+    --code-hover-bg: #cfcfcf;
+    --code-hover-border: #c3c3c3;
+    --link-color: rgba(255, 255, 255, 0.7);
+    --link-hover: #ffffff;
   }
 }
 
