@@ -7,14 +7,14 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 - **Smart 404 Recommendations**: Show relevant pages instead of dead-end 404s
 - **Semantic Search**: Uses vector embeddings for intelligent content matching
 - **Easy Integration**: Simple JavaScript snippet for any website
-- **Real-time Indexing**: Automatically crawls and indexes content via Kernel webhooks
+- **Direct Crawling**: Uses [Kernel](https://onkernel.com) browsers to crawl and vectorize sites directly
 - **PostgreSQL + pgvector**: Efficient vector similarity search
 - **OpenAI Embeddings**: High-quality semantic understanding
 
 ## How It Works
 
-1. **Content Ingestion**: Your website content is crawled and indexed using Kernel's web scraping service
-2. **Vector Processing**: Content is chunked, embedded using OpenAI, and stored in PostgreSQL with pgvector
+1. **Content Ingestion**: Your website content is crawled and vectorized using [Kernel](https://onkernel.com) browsers
+2. **Vector Storage**: Content chunks and embeddings are stored in PostgreSQL with pgvector
 3. **Smart Recommendations**: When a 404 occurs, the system performs semantic search to find relevant pages
 4. **User Experience**: A simple snippet displays helpful suggestions instead of a dead-end page
 
@@ -23,7 +23,7 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 - **Frontend**: Next.js App Router with TypeScript
 - **Database**: PostgreSQL with pgvector extension for vector similarity search
 - **Embeddings**: OpenAI API for generating semantic embeddings
-- **Crawling**: Kernel API for web scraping and content ingestion
+- **Crawling**: [Kernel](https://onkernel.com) browsers for direct web scraping and content vectorization
 - **Validation**: Zod for request/response validation
 
 ## Quick Start
@@ -88,7 +88,7 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 
 ### Internal API
 
-- `POST /api/internal/kernel/webhook` - Kernel webhook for content ingestion
+- `POST /api/internal/kernel/crawl` - Trigger Kernel browser crawling and vectorization
 
 ## Integration
 
@@ -131,12 +131,11 @@ curl -X POST https://your-app.com/api/v1/domains \
 ### 3. Start Content Crawling
 
 ```bash
-curl -X POST https://api.onkernel.com/v1/scrape \
+curl -X POST https://your-app.com/api/internal/kernel/crawl \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $KERNEL_API_KEY" \
   -d '{
     "domain": "example.com",
-    "webhookUrl": "https://your-app.com/api/internal/kernel/webhook"
+    "sitemapUrl": "https://example.com/sitemap.xml"
   }'
 ```
 
@@ -186,7 +185,7 @@ bun run build
 ## Security
 
 - **Origin Validation**: Checks that requests come from verified domains
-- **HMAC Verification**: Kernel webhooks are verified using HMAC signatures
+- **API Authentication**: Kernel API calls are authenticated using API keys
 - **Rate Limiting**: Configurable rate limits for API endpoints
 - **No PII Storage**: Only stores public content and metadata
 
