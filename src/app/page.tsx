@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { siGithub } from "simple-icons";
 
 export default function Home() {
   const [domain, setDomain] = useState("");
@@ -104,11 +105,35 @@ export default function Home() {
           {loading ? "Setting up..." : "Get Snippet"}
         </button>
       </form>
-      {domain && (
-        <p style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
-          {checkingStatus ? "Checking status..." : domainStatus ? (domainStatus.verified ? "Known domain: Verified ✓" : "Known domain: Not verified yet") : ""}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
+        <p style={{ margin: 0, fontSize: 13, opacity: 0.9 }}>
+          {domain && (checkingStatus ? "Checking status..." : domainStatus ? (domainStatus.verified ? "Known domain: Verified ✓" : "Known domain: Not verified yet") : "")}
         </p>
-      )}
+        <a
+          href="https://dashboard.onkernel.com/sign-up"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "flex-end",
+            gap: 6,
+            fontSize: 13,
+            opacity: 0.85,
+            textDecoration: "none",
+            color: "inherit",
+            transition: "opacity 0.2s ease"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = "0.85"}
+        >
+          <span style={{ lineHeight: 1, verticalAlign: "bottom" }}>powered by</span>
+          <img 
+            src="/kernel_logo.svg" 
+            alt="Kernel" 
+            style={{ height: 16, width: "auto" }}
+          />
+        </a>
+      </div>
       {error && <p style={{ color: "#ff6b6b", marginTop: 12 }}>{error}</p>}
       {!verified && siteKey && (
         <div style={{ marginTop: 24, padding: 16, background: "rgba(255, 193, 7, 0.1)", border: "1px solid rgba(255, 193, 7, 0.3)", borderRadius: 8 }}>
@@ -281,6 +306,42 @@ Value:   ${siteKey}`}
           )}
         </div>
       )}
+      
+      {/* GitHub repository link */}
+      <div style={{ 
+        marginTop: 40, 
+        paddingTop: 20, 
+        borderTop: "1px solid rgba(255,255,255,0.1)", 
+        textAlign: "center" 
+      }}>
+        <a
+          href="https://github.com/masnwilliams/better404"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            color: "rgba(255,255,255,0.7)",
+            textDecoration: "none",
+            fontSize: 14,
+            transition: "color 0.2s ease"
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
+          onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            style={{ flexShrink: 0 }}
+          >
+            <path d={siGithub.path} />
+          </svg>
+          <span>View on GitHub</span>
+        </a>
+      </div>
     </main>
   );
 }
