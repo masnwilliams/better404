@@ -46,7 +46,7 @@ export function buildSnippet(siteKeyPublic: string): string {
   const recUrl = `${apiBase.replace(/\/$/, "")}/api/v1/recommendations`;
   return (
     `<div id="smart-404"></div>\n` +
-    `<script>(function(){const siteKey="${siteKeyPublic}";const url=location.href;const ref=document.referrer||null;` +
+    `<script>(function(){const siteKey="${siteKeyPublic}";const url=location.href;const ref=document.referrer||undefined;` +
     `fetch("${recUrl}",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({siteKey,url,referrer:ref,topN:5})})` +
     `.then(r=>r.json()).then(({results})=>{const el=document.getElementById("smart-404");if(!el||!Array.isArray(results))return;` +
     `el.innerHTML=\``+
