@@ -8,5 +8,3 @@ declare namespace NodeJS {
     TOP_N_DEFAULT?: string;
   }
 }
-
-
