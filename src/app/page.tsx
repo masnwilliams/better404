@@ -149,7 +149,7 @@ export default function Home() {
           )}
         </p>
         <a
-          href="https://dashboard.onkernel.com/sign-up"
+          href="https://onkernel.com"
           target="_blank"
           rel="noopener noreferrer"
           style={{
