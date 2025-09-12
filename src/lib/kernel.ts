@@ -45,7 +45,7 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
   const apiBase = process.env.APP_BASE_URL || "";
   const recUrl = `${apiBase.replace(/\/$/, "")}/api/v1/recommendations`;
   
-  const htmlSnippet = `<div id="smart-404"></div>
+  const htmlSnippet = `<div id="better404"></div>
 <script>
 (function(){
   const siteKey="${siteKeyPublic}";
@@ -59,11 +59,11 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
   })
   .then(r=>r.json())
   .then(({results})=>{
-    const el=document.getElementById("smart-404");
+    const el=document.getElementById("better404");
     if(!el||!Array.isArray(results))return;
     
     el.innerHTML=\`
-      <div class="smart-404-container" style="
+      <div class="better404-container" style="
         margin: 2rem 0;
         padding: 1.5rem;
         border-radius: 8px;
@@ -73,13 +73,13 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
         font-size: inherit;
         line-height: inherit;
       ">
-        <h2 class="smart-404-title" style="
+        <h2 class="better404-title" style="
           margin: 0 0 1rem 0;
           font-size: 1.25rem;
           font-weight: 600;
           color: inherit;
         ">Were you looking for one of these?</h2>
-        <ul class="smart-404-list" style="
+        <ul class="better404-list" style="
           list-style: none;
           padding: 0;
           margin: 0;
@@ -87,7 +87,7 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
           gap: 0.75rem;
         ">
           \${results.map(r=>\`
-            <li class="smart-404-item" style="
+            <li class="better404-item" style="
               padding: 0.75rem;
               border-radius: 6px;
               background: rgba(0,0,0,0.02);
@@ -101,7 +101,7 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
                 display: block;
                 margin-bottom: 0.25rem;
               ">\${r.title||r.url}</a>
-              <div class="smart-404-snippet" style="
+              <div class="better404-snippet" style="
                 opacity: 0.7;
                 font-size: 0.875rem;
                 color: inherit;
@@ -113,7 +113,7 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
     \`;
     
     // Add hover effects
-    const items = el.querySelectorAll('.smart-404-item');
+    const items = el.querySelectorAll('.better404-item');
     items.forEach(item => {
       item.addEventListener('mouseenter', () => {
         item.style.background = 'rgba(0,0,0,0.05)';
@@ -171,7 +171,7 @@ export function Smart404({ siteKey }: { siteKey: string }) {
   if (!results.length) return null;
 
   return (
-    <div className="smart-404-container" style={{
+    <div className="better404-container" style={{
       margin: '2rem 0',
       padding: '1.5rem',
       borderRadius: '8px',
@@ -181,7 +181,7 @@ export function Smart404({ siteKey }: { siteKey: string }) {
       fontSize: 'inherit',
       lineHeight: 'inherit'
     }}>
-      <h2 className="smart-404-title" style={{
+      <h2 className="better404-title" style={{
         margin: '0 0 1rem 0',
         fontSize: '1.25rem',
         fontWeight: 600,
@@ -189,7 +189,7 @@ export function Smart404({ siteKey }: { siteKey: string }) {
       }}>
         Were you looking for one of these?
       </h2>
-      <ul className="smart-404-list" style={{
+      <ul className="better404-list" style={{
         listStyle: 'none',
         padding: 0,
         margin: 0,
@@ -197,7 +197,7 @@ export function Smart404({ siteKey }: { siteKey: string }) {
         gap: '0.75rem'
       }}>
         {results.map((result, index) => (
-          <li key={index} className="smart-404-item" style={{
+          <li key={index} className="better404-item" style={{
             padding: '0.75rem',
             borderRadius: '6px',
             background: 'rgba(0,0,0,0.02)',
@@ -217,7 +217,7 @@ export function Smart404({ siteKey }: { siteKey: string }) {
               {result.title || result.url}
             </a>
             {result.snippet && (
-              <div className="smart-404-snippet" style={{
+              <div className="better404-snippet" style={{
                 opacity: 0.7,
                 fontSize: '0.875rem',
                 color: 'inherit'

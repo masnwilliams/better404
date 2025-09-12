@@ -144,7 +144,7 @@ curl -X POST https://your-domain.com/api/v1/domains \
 
 **HTML Version:**
 ```html
-<div id="smart-404"></div>
+<div id="better404"></div>
 <script>
 (function(){
   const siteKey = "pk_live_xxx"; // Get this from your domain registration
@@ -155,7 +155,7 @@ curl -X POST https://your-domain.com/api/v1/domains \
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({siteKey,url,referrer:ref,topN:5})
   }).then(r=>r.json()).then(({results})=>{
-    const el=document.getElementById("smart-404");
+    const el=document.getElementById("better404");
     if(!el||!Array.isArray(results)) return;
     el.innerHTML=`
       <div style="margin:16px 0">
