@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { siGithub, siX } from "simple-icons";
 
@@ -127,7 +128,7 @@ export default function Home() {
           onMouseLeave={(e) => e.currentTarget.style.opacity = "0.85"}
         >
           <span style={{ lineHeight: 1, verticalAlign: "bottom" }}>powered by</span>
-          <img 
+          <Image 
             src="/kernel_logo.svg" 
             alt="Kernel" 
             style={{ height: 16, width: "auto" }}
