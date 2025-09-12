@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [domain, setDomain] = useState("");
@@ -12,6 +12,12 @@ export default function Home() {
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verified, setVerified] = useState<boolean | null>(null);
   const [copied, setCopied] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [domainStatus, setDomainStatus] = useState<{
+    verified: boolean;
+    pagesIndexed?: number;
+    lastCrawledAt?: string | null;
+  } | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,7 +35,14 @@ export default function Home() {
       setSnippet(data.snippet);
       setDomainId(data.id || null);
       setSiteKey(data.siteKeyPublic || null);
-      setVerified(false);
+      // Fetch actual verification status instead of assuming false
+      try {
+        const statusRes = await fetch(`/api/v1/status/${encodeURIComponent(domain.trim().toLowerCase())}`);
+        if (statusRes.ok) {
+          const status = await statusRes.json();
+          if (typeof status?.verified === "boolean") setVerified(!!status.verified);
+        }
+      } catch {}
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       setError(message);
@@ -38,8 +51,42 @@ export default function Home() {
     }
   }
 
+  // Debounced status check while typing
+  useEffect(() => {
+    const d = domain.trim().toLowerCase();
+    if (!d) {
+      setDomainStatus(null);
+      return;
+    }
+    const ctrl = new AbortController();
+    const t = setTimeout(async () => {
+      setCheckingStatus(true);
+      try {
+        const res = await fetch(`/api/v1/status/${encodeURIComponent(d)}`, { signal: ctrl.signal });
+        if (res.ok) {
+          const j = await res.json();
+          if (typeof j?.verified === "boolean") {
+            setDomainStatus({ verified: !!j.verified, pagesIndexed: j.pagesIndexed, lastCrawledAt: j.lastCrawledAt });
+          } else {
+            setDomainStatus(null);
+          }
+        } else {
+          setDomainStatus(null);
+        }
+      } catch (e) {
+        if ((e as Error)?.name !== "AbortError") setDomainStatus(null);
+      } finally {
+        setCheckingStatus(false);
+      }
+    }, 500);
+    return () => {
+      ctrl.abort();
+      clearTimeout(t);
+    };
+  }, [domain]);
+
   return (
-    <main style={{ maxWidth: 800, margin: "40px auto", padding: 16 }}>
+    <main style={{ padding: 16, maxWidth: 800, margin: "20px auto", color: "#e8e8e8", borderRadius: 8 }}>
       <h1>404 Solver</h1>
       <p>Enter your domain to kick off indexing and get your 404 snippet.</p>
       <form onSubmit={submit} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
@@ -55,7 +102,12 @@ export default function Home() {
           {loading ? "Setting up..." : "Get Snippet"}
         </button>
       </form>
-      {error && <p style={{ color: "red", marginTop: 12 }}>{error}</p>}
+      {domain && (
+        <p style={{ marginTop: 8, fontSize: 13, opacity: 0.9 }}>
+          {checkingStatus ? "Checking status..." : domainStatus ? (domainStatus.verified ? "Known domain: Verified ✓" : "Known domain: Not verified yet") : ""}
+        </p>
+      )}
+      {error && <p style={{ color: "#ff6b6b", marginTop: 12 }}>{error}</p>}
       {snippet && (
         <div style={{ marginTop: 24 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
@@ -75,14 +127,14 @@ export default function Home() {
               {copied ? "Copied ✓" : "Copy"}
             </button>
           </div>
-          <textarea readOnly value={snippet} style={{ color: "black", width: "100%", height: 220, fontFamily: "monospace", fontSize: 12 }} />
+          <textarea readOnly value={snippet} style={{ background: "#ffffff", color: "#111111", width: "100%", height: 220, fontFamily: "monospace", fontSize: 12, borderRadius: 6, padding: 12 }} />
           {siteKey && domain && (
-            <div style={{ marginTop: 16, borderTop: "1px solid #ddd", paddingTop: 12 }}>
+            <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 12 }}>
               <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
               <ol style={{ paddingLeft: 18, margin: 0 }}>
                 <li>Add a DNS TXT record:</li>
               </ol>
-              <pre style={{ background: "#f7f7f7", padding: 12, borderRadius: 6, overflowX: "auto" }}>
+              <pre style={{ background: "#f7f7f7", color: "#111111", padding: 12, borderRadius: 6, overflowX: "auto" }}>
 {`Name:    _404-verify.${domain}
 Type:    TXT
 Value:   ${siteKey}`}
