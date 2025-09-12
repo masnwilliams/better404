@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
-  const [snippet, setSnippet] = useState<string | null>(null);
+  const [snippets, setSnippets] = useState<{ html: string; react: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<'html' | 'react'>('react');
   const [error, setError] = useState<string | null>(null);
   const [domainId, setDomainId] = useState<number | null>(null);
   const [siteKey, setSiteKey] = useState<string | null>(null);
@@ -23,7 +24,7 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSnippet(null);
+    setSnippets(null);
     try {
       const res = await fetch("/api/v1/domains", {
         method: "POST",
@@ -32,7 +33,7 @@ export default function Home() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed");
-      setSnippet(data.snippet);
+      setSnippets(data.snippets);
       setDomainId(data.id || null);
       setSiteKey(data.siteKeyPublic || null);
       // Fetch actual verification status instead of assuming false
@@ -108,7 +109,7 @@ export default function Home() {
         </p>
       )}
       {error && <p style={{ color: "#ff6b6b", marginTop: 12 }}>{error}</p>}
-      {snippet && (
+      {snippets && (
         <div style={{ marginTop: 24 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <h3 style={{ margin: 0 }}>Paste this into your 404 page</h3>
@@ -116,18 +117,78 @@ export default function Home() {
               type="button"
               onClick={async () => {
                 try {
-                  await navigator.clipboard.writeText(snippet);
+                  const textToCopy = activeTab === 'html' ? snippets.html : snippets.react;
+                  await navigator.clipboard.writeText(textToCopy);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
                 } catch {}
               }}
-              disabled={!snippet}
+              disabled={!snippets}
               style={{ padding: "6px 10px", fontSize: 14 }}
             >
               {copied ? "Copied ✓" : "Copy"}
             </button>
           </div>
-          <textarea readOnly value={snippet} style={{ background: "#ffffff", color: "#111111", width: "100%", height: 220, fontFamily: "monospace", fontSize: 12, borderRadius: 6, padding: 12 }} />
+          
+          {/* Tab buttons */}
+          <div style={{ display: "flex", gap: 0, marginBottom: 8, borderBottom: "1px solid rgba(255,255,255,0.2)" }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('react')}
+              style={{
+                padding: "8px 16px",
+                fontSize: 14,
+                background: activeTab === 'react' ? "rgba(255,255,255,0.1)" : "transparent",
+                border: "none",
+                color: activeTab === 'react' ? "#fff" : "rgba(255,255,255,0.7)",
+                cursor: "pointer",
+                borderBottom: activeTab === 'react' ? "2px solid #fff" : "2px solid transparent",
+                transition: "all 0.2s ease"
+              }}
+            >
+              React
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('html')}
+              style={{
+                padding: "8px 16px",
+                fontSize: 14,
+                background: activeTab === 'html' ? "rgba(255,255,255,0.1)" : "transparent",
+                border: "none",
+                color: activeTab === 'html' ? "#fff" : "rgba(255,255,255,0.7)",
+                cursor: "pointer",
+                borderBottom: activeTab === 'html' ? "2px solid #fff" : "2px solid transparent",
+                transition: "all 0.2s ease"
+              }}
+            >
+              HTML
+            </button>
+          </div>
+          
+          <p style={{ margin: "0 0 12px 0", fontSize: 13, opacity: 0.8 }}>
+            {activeTab === 'html' 
+              ? "HTML snippet: Copy and paste directly into your 404 page HTML" 
+              : "React component: Import and use in your React 404 page"
+            }
+          </p>
+          
+          <textarea 
+            readOnly 
+            value={activeTab === 'html' ? snippets.html : snippets.react} 
+            style={{ 
+              background: "#ffffff", 
+              color: "#111111", 
+              width: "100%", 
+              height: 300, 
+              fontFamily: "monospace", 
+              fontSize: 12, 
+              borderRadius: 6, 
+              padding: 12,
+              border: "1px solid #ddd",
+              resize: "vertical"
+            }} 
+          />
           {siteKey && domain && (
             <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 12 }}>
               <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
@@ -151,7 +212,7 @@ Value:   ${siteKey}`}
                       const data = await res.json();
                       if (!res.ok) throw new Error(data?.error || data?.reason || "Verify failed");
                       setVerified(data.verified === true || data.ok === true);
-                    } catch (e: unknown) {
+                    } catch () {
                       setVerified(false);
                     } finally {
                       setVerifyLoading(false);

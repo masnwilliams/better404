@@ -19,20 +19,30 @@ export async function POST(req: NextRequest) {
     // Attempt insert; on conflict by name, update timestamp and return existing row (upsert)
     const siteKeyPublicCandidate = `pk_${randomId(28)}`;
     const siteKeySaltCandidate = randomId(40);
-    const res = await query<{ id: number; site_key_public: string; verified: boolean }>(
+    const res = await query<{ id: number; site_key_public: string; verified: boolean; last_scraped_at: string | null }>(
       `INSERT INTO domains (name, site_key_public, site_key_salt, verified)
        VALUES ($1,$2,$3,false)
        ON CONFLICT (name) DO UPDATE SET updated_at = NOW()
-       RETURNING id, site_key_public, verified`,
+       RETURNING id, site_key_public, verified, last_scraped_at`,
       [normalized, siteKeyPublicCandidate, siteKeySaltCandidate]
     );
     const row = res.rows[0];
     const id = row.id;
 
-    // Fire-and-forget scrape kickoff
-    startKernelScrape(normalized).catch(() => {});
-    const snippet = buildSnippet(row.site_key_public);
-    return NextResponse.json({ id, name: normalized, siteKeyPublic: row.site_key_public, snippet, verify: { dns: `_404-verify.${normalized} TXT ${row.site_key_public}` } });
+    // Only kick off scraping if it hasn't been done in the last 24 hours
+    const shouldScrape = !row.last_scraped_at || 
+      (Date.now() - new Date(row.last_scraped_at).getTime()) > 24 * 60 * 60 * 1000;
+    
+    if (shouldScrape) {
+      // Update last_scraped_at and start scraping
+      query(
+        `UPDATE domains SET last_scraped_at = NOW() WHERE id = $1`,
+        [id]
+      ).catch(() => {});
+      startKernelScrape(normalized).catch(() => {});
+    }
+    const snippets = buildSnippet(row.site_key_public);
+    return NextResponse.json({ id, name: normalized, siteKeyPublic: row.site_key_public, snippets, verify: { dns: `_404-verify.${normalized} TXT ${row.site_key_public}` } });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
