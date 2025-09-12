@@ -33,7 +33,7 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 - Node.js 18+ and Bun
 - PostgreSQL with pgvector extension
 - OpenAI API key
-- Kernel API access
+- Kernel API key
 
 ### Installation
 
@@ -53,14 +53,10 @@ A minimal Next.js application that provides intelligent 404 page recommendations
    ```env
    DATABASE_URL="postgres://user:password@localhost:5432/404solver"
    OPENAI_API_KEY="sk-..."
-   KERNEL_API_BASE_URL="https://api.onkernel.com"
    KERNEL_API_KEY="..."
-   KERNEL_WEBHOOK_SECRET="..."
    APP_BASE_URL="https://your-app.com"
-   SITE_KEY_SIGNING_SECRET="..."
    RATE_LIMIT_RECS_PER_MINUTE="60"
    TOP_N_DEFAULT="5"
-   EMBEDDING_DIM="1536"
    ```
 
 3. **Set up the database**:
