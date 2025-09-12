@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const { domain, normalizedPath } = extractDomainAndPath(url);
+    const { domain } = extractDomainAndPath(url);
     if (domain !== domainRow.name) {
       // Cross-domain request blocked
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     ).catch(() => {});
 
     return NextResponse.json({ results: rows });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }
 }

@@ -6,20 +6,23 @@ if (!connectionString) {
 }
 
 // Singleton Pool for the app process
-let pool: Pool;
 declare global {
-  // eslint-disable-next-line no-var
   var __db_pool__: Pool | undefined;
 }
 
 if (!global.__db_pool__) {
   global.__db_pool__ = new Pool({ connectionString });
 }
-pool = global.__db_pool__;
+const pool = global.__db_pool__ as Pool;
 
-export async function query<T = any>(text: string, params?: any[]): Promise<{ rows: T[] }>{
-  const res = await pool.query(text, params);
-  return { rows: res.rows as T[] };
+type PgValue = string | number | boolean | null | Date | Uint8Array;
+type PgValues = PgValue[];
+
+export async function query<TRecord>(text: string, params?: ReadonlyArray<PgValue>): Promise<{ rows: TRecord[] }>{
+  const res = params
+    ? await pool.query(text, params as unknown as PgValues)
+    : await pool.query(text);
+  return { rows: res.rows as TRecord[] };
 }
 
 export function toVectorLiteral(vector: number[]): string {

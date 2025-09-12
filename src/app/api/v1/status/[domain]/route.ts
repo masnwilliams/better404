@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
-export async function GET(_req: NextRequest, { params }: { params: { domain: string } }) {
+export async function GET(_req: NextRequest, ctx: { params: Promise<{ domain: string }> }) {
   try {
-    const name = params.domain.toLowerCase();
+    const { domain } = await ctx.params;
+    const name = domain.toLowerCase();
     const { rows: drows } = await query<{ id: number; verified: boolean }>(
       "SELECT id, verified FROM domains WHERE name = $1",
       [name]

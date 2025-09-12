@@ -23,8 +23,9 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed");
       setSnippet(data.snippet);
-    } catch (err: any) {
-      setError(err?.message || "Something went wrong");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -59,7 +60,7 @@ export default function Home() {
                   await navigator.clipboard.writeText(snippet);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);
-                } catch (_) {}
+                } catch {}
               }}
               disabled={!snippet}
               style={{ padding: "6px 10px", fontSize: 14 }}
