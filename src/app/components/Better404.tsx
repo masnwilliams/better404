@@ -30,7 +30,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
               return window.location.href;
             })(),
             referrer: document.referrer || undefined,
-            topN: 1
+            topN: 5
           })
         });
         const { results } = await response.json();
@@ -94,7 +94,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
             >
               {result.title || result.url}
             </a>
-            {result.snippet && (
+            {/* {result.snippet && (
               <div className="better404-snippet" style={{
                 opacity: 0.7,
                 fontSize: '0.875rem',
@@ -102,7 +102,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
               }}>
                 {result.snippet}
               </div>
-            )}
+            )} */}
           </li>
         ))}
       </ul>
