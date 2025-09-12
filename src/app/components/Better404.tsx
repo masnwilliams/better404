@@ -30,7 +30,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
               return window.location.href;
             })(),
             referrer: document.referrer || undefined,
-            topN: 5
+            topN: 1
           })
         });
         const { results } = await response.json();

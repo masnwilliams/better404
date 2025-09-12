@@ -199,13 +199,20 @@ Value:   ${siteKey}`}
             <button
               type="button"
               onClick={async () => {
-                if (!domainId) return;
+                if (!domainId || !siteKey) return;
                 setVerifyLoading(true);
                 try {
                   const res = await fetch(`/api/v1/domains/${domainId}/verify`, { method: "POST" });
                   const data = await res.json();
                   if (!res.ok) throw new Error(data?.error || data?.reason || "Verify failed");
-                  setVerified(data.verified === true || data.ok === true);
+                  const isVerified = data.verified === true || data.ok === true;
+                  setVerified(isVerified);
+                  
+                  // If verification succeeded, generate and show snippets
+                  if (isVerified && siteKey) {
+                    const snippets = buildSnippet(siteKey);
+                    setSnippets(snippets);
+                  }
                 } catch {
                   setVerified(false);
                 } finally {
@@ -217,7 +224,9 @@ Value:   ${siteKey}`}
             >
               {verifyLoading ? "Checking..." : "Check verification"}
             </button>
-            <span style={{ color: "#b00" }}>Not verified yet</span>
+            <span style={{ color: verified ? "#22c55e" : "#b00" }}>
+              {verified ? "✓ Verified!" : "Not verified yet"}
+            </span>
           </div>
         </div>
       )}
