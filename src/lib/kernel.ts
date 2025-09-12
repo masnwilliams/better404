@@ -148,7 +148,7 @@ interface Recommendation {
   score: number;
 }
 
-export function Smart404({ siteKey }: { siteKey: string }) {
+export function Better404({ siteKey }: { siteKey: string }) {
   const [results, setResults] = useState<Recommendation[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -251,7 +251,7 @@ export function Smart404({ siteKey }: { siteKey: string }) {
   );
 }
 
-// Usage: <Smart404 siteKey="${siteKeyPublic}" />`;
+// Usage: <Better404 siteKey="${siteKeyPublic}" />`;
 
   return { html: htmlSnippet, react: reactSnippet };
 }

@@ -15,9 +15,7 @@ Visit [better404.dev](https://better404.dev) to get started instantly:
 
 ### 🛠️ Self-Hosted
 Deploy your own instance for full control:
-- **Requires**: Kernel API key, PostgreSQL with pgvector, hosting platform
-- **Perfect for**: Enterprise use, custom requirements, data privacy
-- **Benefits**: Full control, custom branding, private data, no external dependencies
+- **Requires**: [Kernel API key](https://dashboard.onkernel.com/api-keys), OpenAI API key, PostgreSQL with pgvector, hosting platform
 
 ## Features
 
@@ -41,7 +39,6 @@ Deploy your own instance for full control:
 - **Database**: PostgreSQL with pgvector extension for vector similarity search
 - **Embeddings**: OpenAI API for generating semantic embeddings
 - **Crawling**: [Kernel](https://onkernel.com) browsers for direct web scraping and content vectorization
-- **Validation**: Zod for request/response validation
 
 ## Quick Start
 
@@ -89,14 +86,13 @@ Deploy your own instance for full control:
    OPENAI_API_KEY="sk-..."
    KERNEL_API_KEY="..."
    APP_BASE_URL="https://your-domain.com"
-   RATE_LIMIT_RECS_PER_MINUTE="60"
    TOP_N_DEFAULT="5"
    ```
-
 3. **Set up the database**:
    ```bash
-   # Run the migration to create tables and enable pgvector
+   # Run the migrations to create tables and enable pgvector
    psql $DATABASE_URL -f migrations/001_init.sql
+   psql $DATABASE_URL -f migrations/002_add_last_scraped_at.sql
    ```
 
 4. **Deploy to your hosting platform**:
@@ -115,10 +111,6 @@ Deploy your own instance for full control:
 - `GET /api/v1/status/[domain]` - Check domain indexing status
 - `POST /api/v1/domains` - Register a new domain
 - `POST /api/v1/domains/[id]/verify` - Verify domain ownership
-
-### Internal API
-
-- `POST /api/internal/kernel/crawl` - Trigger Kernel browser crawling and vectorization
 
 ## Integration
 
@@ -171,13 +163,13 @@ curl -X POST https://your-domain.com/api/v1/domains \
 
 **React Version:**
 ```tsx
-import { Smart404 } from './Smart404';
+import { Better404 } from './Better404';
 
 export function NotFoundPage() {
   return (
     <div>
       <h1>Page Not Found</h1>
-      <Smart404 siteKey="pk_live_xxx" />
+      <Better404 siteKey="pk_live_xxx" />
     </div>
   );
 }
@@ -215,14 +207,11 @@ src/
       v1/                    # Public API endpoints
       internal/              # Internal webhooks
   lib/
+    kernel-app/             # Kernel app for crawling and vectorization
     db.ts                   # Database client and helpers
     embeddings.ts           # Embedding provider wrapper
-    ranking.ts              # Search ranking logic
-    auth.ts                 # Authentication and validation
-    validation.ts           # Zod schemas
     urls.ts                 # URL normalization
-migrations/
-  001_init.sql             # Database schema
+    validation.ts           # Zod schemas
 ```
 
 ### Running Tests
@@ -240,8 +229,7 @@ bun run build
 ## Security
 
 - **Origin Validation**: Checks that requests come from verified domains
-- **API Authentication**: Kernel API calls are authenticated using API keys
-- **Rate Limiting**: Configurable rate limits for API endpoints
+- **API Authentication**: Kernel API calls are authenticated using public site keys
 - **No PII Storage**: Only stores public content and metadata
 
 ## Contributing
