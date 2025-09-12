@@ -212,7 +212,7 @@ Value:   ${siteKey}`}
                       const data = await res.json();
                       if (!res.ok) throw new Error(data?.error || data?.reason || "Verify failed");
                       setVerified(data.verified === true || data.ok === true);
-                    } catch () {
+                    } catch {
                       setVerified(false);
                     } finally {
                       setVerifyLoading(false);
