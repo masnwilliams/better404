@@ -33,7 +33,7 @@ export async function POST(_req: NextRequest, context: { params: Promise<{ id: s
     const row = dres.rows[0];
     if (row.verified) return NextResponse.json({ verified: true });
 
-    const host = `_404-verify.${row.name}`;
+    const host = `_better404.${row.name}`;
     const txts = await lookupTxt(host);
     if (!txts || !txts.includes(row.site_key_public)) {
       return NextResponse.json({ verified: false, reason: "txt_record_not_found" }, { status: 400 });

@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       startKernelScrape(normalized).catch(() => {});
     }
     const snippets = buildSnippet(row.site_key_public);
-    return NextResponse.json({ id, name: normalized, siteKeyPublic: row.site_key_public, snippets, verify: { dns: `_404-verify.${normalized} TXT ${row.site_key_public}` } });
+    return NextResponse.json({ id, name: normalized, siteKeyPublic: row.site_key_public, snippets, verify: { dns: `_better404.${normalized} TXT ${row.site_key_public}` } });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }

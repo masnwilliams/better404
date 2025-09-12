@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 import { Pool } from 'pg';
 
 const kernel = new Kernel();
-const app = kernel.app('404-solver');
+const app = kernel.app('better404');
 
 // ----- Input/Output types -----
 type CrawlInput = { domain: string };

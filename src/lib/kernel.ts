@@ -3,7 +3,7 @@ import { Kernel } from '@onkernel/sdk';
 export async function startKernelScrape(domain: string): Promise<{ ok: boolean }>{
   const baseURL = 'https://api.onkernel.com';
   const apiKey = process.env.KERNEL_API_KEY;
-  const appName = '404-solver';
+  const appName = 'better404';
   if (!baseURL || !apiKey) return { ok: false };
   try {
     const client = new Kernel({ apiKey, baseURL });

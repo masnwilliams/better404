@@ -1,6 +1,23 @@
-# 404 Solver
+# Better404
 
 A minimal Next.js application that provides intelligent 404 page recommendations by leveraging semantic search and vector embeddings. Instead of showing dead-end 404 pages, it suggests relevant on-site content to help users find what they're looking for.
+
+## Two Ways to Use Better404
+
+### 🌐 Hosted Service (Recommended)
+Visit [better404.dev](https://better404.dev) to get started instantly:
+1. Enter your domain
+2. Verify ownership with a DNS record
+3. Copy the snippet to your 404 page
+4. Done! Your site will be automatically crawled and indexed
+
+**Benefits**: Zero setup, automatic updates, managed infrastructure, no maintenance
+
+### 🛠️ Self-Hosted
+Deploy your own instance for full control:
+- **Requires**: Kernel API key, PostgreSQL with pgvector, hosting platform
+- **Perfect for**: Enterprise use, custom requirements, data privacy
+- **Benefits**: Full control, custom branding, private data, no external dependencies
 
 ## Features
 
@@ -28,19 +45,36 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Use the Hosted Service (Easiest)
+
+1. **Visit [better404.dev](https://better404.dev)**
+2. **Enter your domain** (e.g., `example.com`)
+3. **Add DNS verification record**:
+   ```
+   Name:    _better404.example.com
+   Type:    TXT
+   Value:   [your-site-key]
+   ```
+4. **Verify ownership** by clicking "Check verification"
+5. **Copy the snippet** and paste it into your 404 page
+6. **Done!** Your site will be automatically crawled and indexed
+
+### Option 2: Self-Hosted Deployment
+
+#### Prerequisites
 
 - Node.js 18+ and Bun
 - PostgreSQL with pgvector extension
 - OpenAI API key
 - Kernel API key
+- Hosting platform (Vercel, Railway, etc.)
 
-### Installation
+#### Installation
 
 1. **Clone and install dependencies**:
    ```bash
    git clone <repository-url>
-   cd 404-solver
+   cd better404
    bun install
    ```
 
@@ -51,10 +85,10 @@ A minimal Next.js application that provides intelligent 404 page recommendations
    
    Configure the following variables:
    ```env
-   DATABASE_URL="postgres://user:password@localhost:5432/404solver"
+   DATABASE_URL="postgres://user:password@localhost:5432/better404"
    OPENAI_API_KEY="sk-..."
    KERNEL_API_KEY="..."
-   APP_BASE_URL="https://your-app.com"
+   APP_BASE_URL="https://your-domain.com"
    RATE_LIMIT_RECS_PER_MINUTE="60"
    TOP_N_DEFAULT="5"
    ```
@@ -65,13 +99,13 @@ A minimal Next.js application that provides intelligent 404 page recommendations
    psql $DATABASE_URL -f migrations/001_init.sql
    ```
 
-4. **Start the development server**:
+4. **Deploy to your hosting platform**:
    ```bash
-   bun dev
+   bun run build
    ```
 
-5. **Open your browser**:
-   Navigate to [http://localhost:3000](http://localhost:3000)
+5. **Start using**:
+   Navigate to your deployed URL and follow the same steps as the hosted service
 
 ## API Endpoints
 
@@ -88,16 +122,27 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 
 ## Integration
 
-### 1. Register Your Domain
+### Using the Hosted Service
+
+1. **Visit [better404.dev](https://better404.dev)**
+2. **Enter your domain** and get your site key
+3. **Add DNS verification** and verify ownership
+4. **Copy the snippet** and paste it into your 404 page
+5. **Done!** Crawling happens automatically
+
+### Self-Hosted Integration
+
+#### 1. Register Your Domain
 
 ```bash
-curl -X POST https://your-app.com/api/v1/domains \
+curl -X POST https://your-domain.com/api/v1/domains \
   -H "Content-Type: application/json" \
   -d '{"domain": "example.com"}'
 ```
 
-### 2. Add the Snippet to Your 404 Page
+#### 2. Add the Snippet to Your 404 Page
 
+**HTML Version:**
 ```html
 <div id="smart-404"></div>
 <script>
@@ -105,7 +150,7 @@ curl -X POST https://your-app.com/api/v1/domains \
   const siteKey = "pk_live_xxx"; // Get this from your domain registration
   const url = location.href;
   const ref = document.referrer || null;
-  fetch("https://api.your-app.com/api/v1/recommendations",{
+  fetch("https://your-domain.com/api/v1/recommendations",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({siteKey,url,referrer:ref,topN:5})
@@ -124,10 +169,24 @@ curl -X POST https://your-app.com/api/v1/domains \
 </script>
 ```
 
-### 3. Start Content Crawling
+**React Version:**
+```tsx
+import { Smart404 } from './Smart404';
+
+export function NotFoundPage() {
+  return (
+    <div>
+      <h1>Page Not Found</h1>
+      <Smart404 siteKey="pk_live_xxx" />
+    </div>
+  );
+}
+```
+
+#### 3. Start Content Crawling
 
 ```bash
-curl -X POST https://your-app.com/api/internal/kernel/crawl \
+curl -X POST https://your-domain.com/api/internal/kernel/crawl \
   -H "Content-Type: application/json" \
   -d '{
     "domain": "example.com",

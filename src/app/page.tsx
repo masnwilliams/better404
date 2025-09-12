@@ -88,7 +88,7 @@ export default function Home() {
 
   return (
     <main style={{ padding: 16, maxWidth: 800, margin: "20px auto", color: "#e8e8e8", borderRadius: 8 }}>
-      <h1>404 Solver</h1>
+      <h1>Better404</h1>
       <p>Enter your domain to kick off indexing and get your 404 snippet.</p>
       <form onSubmit={submit} style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
         <input
@@ -196,7 +196,7 @@ export default function Home() {
                 <li>Add a DNS TXT record:</li>
               </ol>
               <pre style={{ background: "#f7f7f7", color: "#111111", padding: 12, borderRadius: 6, overflowX: "auto" }}>
-{`Name:    _404-verify.${domain}
+{`Name:    _better404.${domain}
 Type:    TXT
 Value:   ${siteKey}`}
               </pre>
