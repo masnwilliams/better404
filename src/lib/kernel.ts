@@ -111,11 +111,11 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
                 display: block;
                 margin-bottom: 0.25rem;
               ">\${r.title||r.url}</a>
-              <div class="better404-snippet" style="
+              <!-- <div class="better404-snippet" style="
                 opacity: 0.7;
                 font-size: 0.875rem;
                 color: inherit;
-              ">\${r.snippet||""}</div>
+              ">\${r.snippet||""}</div> -->
             </li>
           \`).join("")}
         </ul>
@@ -235,7 +235,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
             >
               {result.title || result.url}
             </a>
-            {result.snippet && (
+            {/* {result.snippet && (
               <div className="better404-snippet" style={{
                 opacity: 0.7,
                 fontSize: '0.875rem',
@@ -243,7 +243,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
               }}>
                 {result.snippet}
               </div>
-            )}
+            )} */}
           </li>
         ))}
       </ul>
