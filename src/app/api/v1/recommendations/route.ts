@@ -5,6 +5,24 @@ import { extractDomainAndPath, buildQueryTextFromUrl } from "@/lib/urls";
 import { query, toVectorLiteral } from "@/lib/db";
 import OpenAI from "openai";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Max-Age": "86400",
+};
+
+function jsonWithCors(data: unknown, init?: ResponseInit) {
+  const headers = new Headers(init?.headers);
+  for (const [k, v] of Object.entries(CORS_HEADERS)) headers.set(k, v);
+  return NextResponse.json(data, { ...init, headers });
+}
+
+export async function OPTIONS() {
+  const headers = new Headers(CORS_HEADERS);
+  return new NextResponse(null, { status: 204, headers });
+}
+
 export async function POST(req: NextRequest) {
   const started = Date.now();
   try {
@@ -13,7 +31,7 @@ export async function POST(req: NextRequest) {
     const parsed = RecommendationsRequestSchema.safeParse(body);
     if (!parsed.success) {
       console.log(`[recommendations] validation failed: ${JSON.stringify(parsed.error)}`);
-      return NextResponse.json({ error: "invalid_request" }, { status: 400 });
+      return jsonWithCors({ error: "invalid_request" }, { status: 400 });
     }
     const { siteKey, url, referrer, topN } = parsed.data;
     console.log(`[recommendations] siteKey=${siteKey} url=${url} referrer=${referrer} topN=${topN}`);
@@ -25,25 +43,15 @@ export async function POST(req: NextRequest) {
     );
     if (domainRes.rows.length === 0) {
       console.log(`[recommendations] unauthorized siteKey=${siteKey}`);
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+      return jsonWithCors({ error: "unauthorized" }, { status: 401 });
     }
     const domainRow = domainRes.rows[0];
     console.log(`[recommendations] domain resolved id=${domainRow.id} name=${domainRow.name}`);
 
-    // Basic referer/origin check if present
-    const origin = req.headers.get("origin") || req.headers.get("referer");
-    if (origin) {
-      const originHost = new URL(origin).hostname.toLowerCase().replace(/^www\./, "");
-      if (originHost !== domainRow.name) {
-        console.log(`[recommendations] origin mismatch origin=${originHost} expected=${domainRow.name}`);
-        return NextResponse.json({ error: "forbidden" }, { status: 403 });
-      }
-    }
-
     const { domain } = extractDomainAndPath(url);
     if (domain !== domainRow.name) {
       console.log(`[recommendations] cross-domain blocked domain=${domain} expected=${domainRow.name}`);
-      return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      return jsonWithCors({ error: "forbidden" }, { status: 403 });
     }
 
     const k = Math.min(Math.max(topN ?? Number(process.env.TOP_N_DEFAULT ?? 5), 1), 20);
@@ -101,9 +109,9 @@ export async function POST(req: NextRequest) {
       [domainRow.id, url, referrer ?? null, JSON.stringify(rows), latency]
     ).catch(() => {});
 
-    return NextResponse.json({ results: rows });
+    return jsonWithCors({ results: rows });
   } catch (e) {
     console.log(`[recommendations] error: ${e instanceof Error ? e.message : String(e)}`);
-    return NextResponse.json({ error: "server_error" }, { status: 500 });
+    return jsonWithCors({ error: "server_error" }, { status: 500 });
   }
 }
