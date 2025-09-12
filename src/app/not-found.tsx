@@ -2,6 +2,7 @@
 
 import { siGithub, siX } from "simple-icons";
 import { Better404 } from "./components/Better404";
+import Link from "next/link";
 
 export default function NotFound() {
 
@@ -21,7 +22,7 @@ export default function NotFound() {
         <h1 style={{ fontSize: "4rem", margin: 0, color: "#ff6b6b" }}>404</h1>
         <h2 style={{ margin: "16px 0", fontSize: "1.5rem" }}>Page Not Found</h2>
         <p style={{ opacity: 0.8, fontSize: "1.1rem" }}>
-          The page you're looking for doesn't exist, but we can help you find what you need!
+          {`The page you're looking for doesn't exist, but we can help you find what you need!`}
         </p>
       </div>
 
@@ -32,8 +33,9 @@ export default function NotFound() {
 
       {/* Navigation */}
       <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <a
+        <Link
           href="/"
+          passHref
           style={{
             display: "inline-block",
             padding: "12px 24px",
@@ -52,7 +54,7 @@ export default function NotFound() {
           }}
         >
           ← Back to Home
-        </a>
+        </Link>
       </div>
 
       {/* Social links */}

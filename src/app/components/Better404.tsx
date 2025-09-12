@@ -23,7 +23,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
               if (window.parent !== window) {
                 try {
                   return window.parent.location.href;
-                } catch (e) {
+                } catch {
                   return document.referrer || window.location.href;
                 }
               }

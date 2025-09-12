@@ -55,7 +55,7 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
     // Try to get URL from parent window or referrer
     try {
       url = window.parent.location.href;
-    } catch (e) {
+    } catch {
       // Cross-origin restriction, fall back to referrer
       url = document.referrer || location.href;
     }
@@ -164,7 +164,7 @@ export function Better404({ siteKey }: { siteKey: string }) {
               if (window.parent !== window) {
                 try {
                   return window.parent.location.href;
-                } catch (e) {
+                } catch {
                   return document.referrer || window.location.href;
                 }
               }

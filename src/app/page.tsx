@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { siGithub, siX } from "simple-icons";
+import { buildSnippet } from "@/lib/kernel";
 
 export default function Home() {
   const [domain, setDomain] = useState("");
@@ -27,26 +28,49 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setSnippets(null);
+    
+    const domainName = domain.trim().toLowerCase();
+    
     try {
-      const res = await fetch("/api/v1/domains", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: domain.trim().toLowerCase() })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed");
-      setSnippets(data.snippets);
-      setDomainId(data.id || null);
-      setSiteKey(data.siteKeyPublic || null);
-      setVerified(data.verified || false);
-      // Fetch actual verification status instead of assuming false
-      try {
-        const statusRes = await fetch(`/api/v1/status/${encodeURIComponent(domain.trim().toLowerCase())}`);
-        if (statusRes.ok) {
-          const status = await statusRes.json();
-          if (typeof status?.verified === "boolean") setVerified(!!status.verified);
+      // First check if domain exists and is verified
+      const statusRes = await fetch(`/api/v1/status/${encodeURIComponent(domainName)}`);
+      let isVerified = false;
+      let existingDomainId = null;
+      let existingSiteKey = null;
+      
+      if (statusRes.ok) {
+        const status = await statusRes.json();
+        isVerified = !!status.verified;
+        existingDomainId = status.id;
+        existingSiteKey = status.siteKeyPublic;
+      }
+      
+      if (isVerified && existingSiteKey) {
+        // Domain is verified, get snippets directly
+        const snippets = buildSnippet(existingSiteKey);
+        setSnippets(snippets);
+        setDomainId(existingDomainId);
+        setSiteKey(existingSiteKey);
+        setVerified(true);
+      } else {
+        // Domain not verified or doesn't exist, register/update it
+        const res = await fetch("/api/v1/domains", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: domainName })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed");
+        
+        setDomainId(data.id || null);
+        setSiteKey(data.siteKeyPublic || null);
+        setVerified(data.verified || false);
+        
+        // If it's verified, get snippets
+        if (data.verified && data.snippets) {
+          setSnippets(data.snippets);
         }
-      } catch {}
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       setError(message);
@@ -103,12 +127,26 @@ export default function Home() {
           required
         />
         <button type="submit" disabled={loading} style={{ padding: "8px 14px", fontSize: 16 }}>
-          {loading ? "Setting up..." : "Get Snippet"}
+          {loading 
+            ? "Checking..." 
+            : domainStatus?.verified 
+              ? "Get Snippet" 
+              : domainStatus === null 
+                ? "Get Started" 
+                : "Verify Domain"
+          }
         </button>
       </form>
       <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
         <p style={{ margin: 0, fontSize: 13, opacity: 0.9 }}>
-          {domain && (checkingStatus ? "Checking status..." : domainStatus ? (domainStatus.verified ? "Known domain: Verified ✓" : "Known domain: Not verified yet") : "")}
+          {domain && (checkingStatus 
+            ? "Checking status..." 
+            : domainStatus?.verified 
+              ? "✓ Domain verified - ready for snippets" 
+              : domainStatus 
+                ? "Domain registered - needs verification" 
+                : ""
+          )}
         </p>
         <a
           href="https://dashboard.onkernel.com/sign-up"
@@ -131,7 +169,8 @@ export default function Home() {
           <Image 
             src="/kernel_logo.svg" 
             alt="Kernel" 
-            style={{ height: 16, width: "auto" }}
+            height={16}
+            width={70}
           />
         </a>
       </div>
