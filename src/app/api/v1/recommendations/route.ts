@@ -18,9 +18,9 @@ export async function POST(req: NextRequest) {
     const { siteKey, url, referrer, topN } = parsed.data;
     console.log(`[recommendations] siteKey=${siteKey} url=${url} referrer=${referrer} topN=${topN}`);
 
-    // Resolve domain from siteKey
+    // Resolve domain from siteKey; only allow verified domains
     const domainRes = await query<{ id: number; name: string }>(
-      "SELECT id, name FROM domains WHERE site_key_public = $1",
+      "SELECT id, name FROM domains WHERE site_key_public = $1 AND verified = true",
       [siteKey]
     );
     if (domainRes.rows.length === 0) {
@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       FROM chunks c
       JOIN pages p ON p.id = c.page_id
       JOIN domains d ON d.id = p.domain_id
-      WHERE d.id = $1
+      WHERE d.id = $1 AND d.verified = true
       ORDER BY c.embedding <=> ${vectorLiteral}
       LIMIT $2
     `;
