@@ -29,9 +29,9 @@ export async function POST(req: NextRequest) {
     const row = res.rows[0];
     const id = row.id;
 
-    // Only kick off scraping if it hasn't been done in the last 24 hours
-    const shouldScrape = !row.last_scraped_at || 
-      (Date.now() - new Date(row.last_scraped_at).getTime()) > 24 * 60 * 60 * 1000;
+    // Only kick off scraping if domain is verified and it hasn't been done in the last 24 hours
+    const shouldScrape = row.verified && (!row.last_scraped_at || 
+      (Date.now() - new Date(row.last_scraped_at).getTime()) > 24 * 60 * 60 * 1000);
     
     if (shouldScrape) {
       // Update last_scraped_at and start scraping
@@ -41,8 +41,17 @@ export async function POST(req: NextRequest) {
       ).catch(() => {});
       startKernelScrape(normalized).catch(() => {});
     }
-    const snippets = buildSnippet(row.site_key_public);
-    return NextResponse.json({ id, name: normalized, siteKeyPublic: row.site_key_public, snippets, verify: { dns: `_better404.${normalized} TXT ${row.site_key_public}` } });
+    
+    // Only return snippets if domain is verified
+    const snippets = row.verified ? buildSnippet(row.site_key_public) : null;
+    return NextResponse.json({ 
+      id, 
+      name: normalized, 
+      siteKeyPublic: row.site_key_public, 
+      verified: row.verified,
+      snippets, 
+      verify: { dns: `_better404.${normalized} TXT ${row.site_key_public}` } 
+    });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }

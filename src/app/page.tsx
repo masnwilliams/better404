@@ -36,6 +36,7 @@ export default function Home() {
       setSnippets(data.snippets);
       setDomainId(data.id || null);
       setSiteKey(data.siteKeyPublic || null);
+      setVerified(data.verified || false);
       // Fetch actual verification status instead of assuming false
       try {
         const statusRes = await fetch(`/api/v1/status/${encodeURIComponent(domain.trim().toLowerCase())}`);
@@ -109,8 +110,21 @@ export default function Home() {
         </p>
       )}
       {error && <p style={{ color: "#ff6b6b", marginTop: 12 }}>{error}</p>}
+      {!verified && siteKey && (
+        <div style={{ marginTop: 24, padding: 16, background: "rgba(255, 193, 7, 0.1)", border: "1px solid rgba(255, 193, 7, 0.3)", borderRadius: 8 }}>
+          <h3 style={{ margin: "0 0 8px 0", color: "#ffc107" }}>Domain Not Verified</h3>
+          <p style={{ margin: "0 0 12px 0", opacity: 0.9 }}>
+            You need to verify domain ownership before getting your snippet. Add the DNS record below and click "Check verification".
+          </p>
+        </div>
+      )}
       {snippets && (
         <div style={{ marginTop: 24 }}>
+          <div style={{ marginBottom: 16, padding: 12, background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.3)", borderRadius: 6 }}>
+            <p style={{ margin: 0, color: "#22c55e", fontSize: 14 }}>
+              ✓ Domain verified! Your snippet is ready to use.
+            </p>
+          </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <h3 style={{ margin: 0 }}>Paste this into your 404 page</h3>
             <button
