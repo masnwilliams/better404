@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 const provider = "openai";
 const openaiApiKey = process.env.OPENAI_API_KEY;
-const model = process.env.EMBEDDING_MODEL || "text-embedding-3-small"; // 1536 dims
+const model = "text-embedding-3-small"; // 1536 dims
 
 let openai: OpenAI | null = null;
 if (provider === "openai") {

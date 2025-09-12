@@ -219,7 +219,7 @@ ${cleaned.slice(0, 12000)}` }
             // Embed via app webhook route reusing app code or embed inline (OpenAI)
             let vec: number[] | null = null;
             if (openai) {
-              const emb = await openai.embeddings.create({ model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small', input: ch });
+              const emb = await openai.embeddings.create({ model: 'text-embedding-3-small', input: ch });
               vec = (emb.data[0]?.embedding as number[]) || null;
             }
             if (vec && Array.isArray(vec)) {
