@@ -4,7 +4,7 @@ A minimal Next.js application that provides intelligent 404 page recommendations
 
 ## Two Ways to Use Better404
 
-### 🌐 Hosted Service (Recommended)
+### 🌐 Hosted Service
 Visit [better404.dev](https://better404.dev) to get started instantly:
 1. Enter your domain
 2. Verify ownership with a DNS record
