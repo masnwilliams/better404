@@ -13,7 +13,6 @@
   "dependencies": {
     "@dqbd/tiktoken": "^1.0.22",
     "@onkernel/sdk": "^0.11.1",
-    "@vercel/analytics": "^1.5.0",
     "next": "15.5.3",
     "openai": "^5.20.1",
     "pg": "^8.16.3",
