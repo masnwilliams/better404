@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { siGithub } from "simple-icons";
+import { siGithub, siX } from "simple-icons";
 
 export default function Home() {
   const [domain, setDomain] = useState("");
@@ -307,40 +307,67 @@ Value:   ${siteKey}`}
         </div>
       )}
       
-      {/* GitHub repository link */}
+      {/* Social links */}
       <div style={{ 
         marginTop: 40, 
         paddingTop: 20, 
         borderTop: "1px solid rgba(255,255,255,0.1)", 
         textAlign: "center" 
       }}>
-        <a
-          href="https://github.com/masnwilliams/better404"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            color: "rgba(255,255,255,0.7)",
-            textDecoration: "none",
-            fontSize: 14,
-            transition: "color 0.2s ease"
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
-          onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            style={{ flexShrink: 0 }}
+        <div style={{ display: "flex", gap: 24, justifyContent: "center", flexWrap: "wrap" }}>
+          <a
+            href="https://github.com/masnwilliams/better404"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              color: "rgba(255,255,255,0.7)",
+              textDecoration: "none",
+              fontSize: 14,
+              transition: "color 0.2s ease"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
           >
-            <path d={siGithub.path} />
-          </svg>
-          <span>View on GitHub</span>
-        </a>
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style={{ flexShrink: 0 }}
+            >
+              <path d={siGithub.path} />
+            </svg>
+          </a>
+          <a
+            href="https://x.com/masnwilliams"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              color: "rgba(255,255,255,0.7)",
+              textDecoration: "none",
+              fontSize: 14,
+              transition: "color 0.2s ease"
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#fff"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(255,255,255,0.7)"}
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              style={{ flexShrink: 0 }}
+            >
+              <path d={siX.path} />
+            </svg>
+          </a>
+        </div>
       </div>
     </main>
   );
