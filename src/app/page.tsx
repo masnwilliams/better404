@@ -114,7 +114,7 @@ export default function Home() {
         <div style={{ marginTop: 24, padding: 16, background: "rgba(255, 193, 7, 0.1)", border: "1px solid rgba(255, 193, 7, 0.3)", borderRadius: 8 }}>
           <h3 style={{ margin: "0 0 8px 0", color: "#ffc107" }}>Domain Not Verified</h3>
           <p style={{ margin: "0 0 12px 0", opacity: 0.9 }}>
-            You need to verify domain ownership before getting your snippet. Add the DNS record below and click "Check verification".
+            You need to verify domain ownership before getting your snippet. Add the DNS record below and click `Check verification".``
           </p>
         </div>
       )}
