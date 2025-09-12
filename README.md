@@ -64,6 +64,7 @@ Deploy your own instance for full control:
 - PostgreSQL with pgvector extension
 - OpenAI API key
 - Kernel API key
+- Kernel CLI installed (`brew install onkernel/tap/kernel`)
 - Hosting platform (Vercel, Railway, etc.)
 
 #### Installation
@@ -95,12 +96,20 @@ Deploy your own instance for full control:
    psql $DATABASE_URL -f migrations/002_add_last_scraped_at.sql
    ```
 
-4. **Deploy to your hosting platform**:
+4. **Deploy the Kernel app** (required for crawling):
+   ```bash
+   cd src/lib/kernel-app
+   kernel deploy index.ts --env-file ../../../.env
+   ```
+   
+   This deploys the web scraping and content vectorization service that crawls your website and creates embeddings for the recommendation engine.
+
+5. **Deploy to your hosting platform**:
    ```bash
    bun run build
    ```
 
-5. **Start using**:
+6. **Start using**:
    Navigate to your deployed URL and follow the same steps as the hosted service
 
 ## API Endpoints
