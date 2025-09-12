@@ -118,6 +118,44 @@ export default function Home() {
           </p>
         </div>
       )}
+      {siteKey && domain && !verified && (
+        <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 12 }}>
+          <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
+          <ol style={{ paddingLeft: 18, margin: 0 }}>
+            <li>Add a DNS TXT record:</li>
+          </ol>
+          <pre style={{ background: "#f7f7f7", color: "#111111", padding: 12, borderRadius: 6, overflowX: "auto" }}>
+{`Name:    _better404.${domain}
+Type:    TXT
+Value:   ${siteKey}`}
+          </pre>
+          <p style={{ margin: "8px 0 0", opacity: 0.8 }}>Propagation can take a few minutes.</p>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12 }}>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!domainId) return;
+                setVerifyLoading(true);
+                try {
+                  const res = await fetch(`/api/v1/domains/${domainId}/verify`, { method: "POST" });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data?.error || data?.reason || "Verify failed");
+                  setVerified(data.verified === true || data.ok === true);
+                } catch {
+                  setVerified(false);
+                } finally {
+                  setVerifyLoading(false);
+                }
+              }}
+              disabled={verifyLoading}
+              style={{ padding: "6px 10px", fontSize: 14 }}
+            >
+              {verifyLoading ? "Checking..." : "Check verification"}
+            </button>
+            <span style={{ color: "#b00" }}>Not verified yet</span>
+          </div>
+        </div>
+      )}
       {snippets && (
         <div style={{ marginTop: 24 }}>
           <div style={{ marginBottom: 16, padding: 12, background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.3)", borderRadius: 6 }}>
@@ -203,7 +241,7 @@ export default function Home() {
               resize: "vertical"
             }} 
           />
-          {siteKey && domain && (
+          {siteKey && domain && !verified && (
             <div style={{ marginTop: 16, borderTop: "1px solid rgba(255,255,255,0.15)", paddingTop: 12 }}>
               <h3 style={{ margin: "8px 0" }}>Verify your domain</h3>
               <ol style={{ paddingLeft: 18, margin: 0 }}>
@@ -237,8 +275,7 @@ Value:   ${siteKey}`}
                 >
                   {verifyLoading ? "Checking..." : "Check verification"}
                 </button>
-                {verified === true && <span style={{ color: "green" }}>Verified ✓</span>}
-                {verified === false && <span style={{ color: "#b00" }}>Not verified yet</span>}
+                <span style={{ color: "#b00" }}>Not verified yet</span>
               </div>
             </div>
           )}
