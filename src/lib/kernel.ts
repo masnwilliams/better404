@@ -49,7 +49,17 @@ export function buildSnippet(siteKeyPublic: string): { html: string; react: stri
 <script>
 (function(){
   const siteKey="${siteKeyPublic}";
-  const url=location.href;
+  // Get URL from parent window if in iframe, otherwise current window
+  let url = location.href;
+  if (window.parent !== window) {
+    // Try to get URL from parent window or referrer
+    try {
+      url = window.parent.location.href;
+    } catch (e) {
+      // Cross-origin restriction, fall back to referrer
+      url = document.referrer || location.href;
+    }
+  }
   const ref=document.referrer||undefined;
   
   fetch("${recUrl}",{
@@ -150,7 +160,16 @@ export function Smart404({ siteKey }: { siteKey: string }) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             siteKey,
-            url: window.location.href,
+            url: (() => {
+              if (window.parent !== window) {
+                try {
+                  return window.parent.location.href;
+                } catch (e) {
+                  return document.referrer || window.location.href;
+                }
+              }
+              return window.location.href;
+            })(),
             referrer: document.referrer || undefined,
             topN: 5
           })
