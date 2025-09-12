@@ -2,22 +2,23 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { normalizeDomain } from "@/lib/urls";
 
-export async function GET(_req: NextRequest, { params }: { params: { domain: string } }) {
+export async function GET(_req: NextRequest, context: { params: Promise<{ domain: string }> }) {
   try {
-    const domain = normalizeDomain(params.domain.toLowerCase());
-    const dres = await query<{ id: number; verified: boolean }>(
-      "SELECT id, verified FROM domains WHERE name = $1",
-      [domain]
+    const { domain } = await context.params;
+    const normalized = normalizeDomain(domain.toLowerCase());
+    const dres = await query<{ id: number; verified: boolean; pages: number; last: string | null }>(
+      `SELECT d.id, d.verified, 
+              COUNT(p.id)::int AS pages, 
+              MAX(p.last_crawled_at)::text AS last 
+       FROM domains d 
+       LEFT JOIN pages p ON p.domain_id = d.id 
+       WHERE d.name = $1 
+       GROUP BY d.id, d.verified`,
+      [normalized]
     );
     if (dres.rows.length === 0) return NextResponse.json({ verified: false, pagesIndexed: 0 });
-    const { id, verified } = dres.rows[0];
-    const pres = await query<{ pages: number; last: string | null }>(
-      `SELECT COUNT(*)::int AS pages, MAX(last_crawled_at)::text AS last FROM pages WHERE domain_id = $1`,
-      [id]
-    );
-    const pagesIndexed = pres.rows[0]?.pages ?? 0;
-    const lastCrawledAt = pres.rows[0]?.last ?? null;
-    return NextResponse.json({ verified, pagesIndexed, lastCrawledAt });
+    const { verified, pages, last } = dres.rows[0];
+    return NextResponse.json({ verified, pagesIndexed: pages, lastCrawledAt: last });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }

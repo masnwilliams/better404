@@ -20,9 +20,10 @@ async function lookupTxt(host: string): Promise<string[] | null> {
   } catch { return null; }
 }
 
-export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_req: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const id = Number(params.id);
+    const { id: idStr } = await context.params;
+    const id = Number(idStr);
     if (!Number.isFinite(id)) return NextResponse.json({ error: "invalid_id" }, { status: 400 });
     const dres = await query<{ id: number; name: string; site_key_public: string; verified: boolean }>(
       "SELECT id, name, site_key_public, verified FROM domains WHERE id = $1",
