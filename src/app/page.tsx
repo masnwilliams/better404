@@ -125,7 +125,7 @@ export default function Home() {
             <li>Add a DNS TXT record:</li>
           </ol>
           <pre style={{ background: "#f7f7f7", color: "#111111", padding: 12, borderRadius: 6, overflowX: "auto" }}>
-{`Name:    _better404.${domain}
+{`Host:    _better404
 Type:    TXT
 Value:   ${siteKey}`}
           </pre>
@@ -248,7 +248,7 @@ Value:   ${siteKey}`}
                 <li>Add a DNS TXT record:</li>
               </ol>
               <pre style={{ background: "#f7f7f7", color: "#111111", padding: 12, borderRadius: 6, overflowX: "auto" }}>
-{`Name:    _better404.${domain}
+{`Host:    _better404
 Type:    TXT
 Value:   ${siteKey}`}
               </pre>
