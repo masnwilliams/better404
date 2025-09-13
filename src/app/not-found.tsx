@@ -27,9 +27,9 @@ export default function NotFound() {
       </div>
 
       {/* Better404 Recommendations - Paste your React snippet here */}
-      <div style={{ marginBottom: 40 }}>
+      {/* <div style={{ marginBottom: 40 }}>
         <Better404 siteKey="pk_QMhdpxfXjqblP795fQ2edqYwxvDE" /> 
-      </div>
+      </div> */}
 
       {/* Navigation */}
       <div style={{ textAlign: "center", marginBottom: 40 }}>

@@ -1,6 +1,6 @@
 export function buildSnippet(siteKeyPublic: string): { html: string; react: string } {
-  const apiBase = process.env.APP_BASE_URL || "";
-  const recUrl = `${apiBase.replace(/\/$/, "")}/api/v1/recommendations`;
+  const apiBase = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
+  const recUrl = `${apiBase}/api/v1/recommendations`;
   
   const htmlSnippet = `<div id="better404"></div>
 <script>
