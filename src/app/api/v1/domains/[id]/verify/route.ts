@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { extractDomainAndPath } from "@/lib/urls";
+import { startKernelScrape } from "@/lib/kernel-server";
 
 async function lookupTxt(host: string): Promise<string[] | null> {
   // Minimal DNS-over-HTTPS TXT lookup using Cloudflare
@@ -25,22 +27,33 @@ export async function POST(_req: NextRequest, context: { params: Promise<{ id: s
     const { id: idStr } = await context.params;
     const id = Number(idStr);
     if (!Number.isFinite(id)) return NextResponse.json({ error: "invalid_id" }, { status: 400 });
-    const dres = await query<{ id: number; name: string; site_key_public: string; verified: boolean }>(
-      "SELECT id, name, site_key_public, verified FROM domains WHERE id = $1",
+    const dres = await query<{ id: number; name: string; site_key_public: string; verified: boolean; last_scraped_at: string | null }>(
+      "SELECT id, name, site_key_public, verified, last_scraped_at FROM domains WHERE id = $1",
       [id]
     );
     if (dres.rows.length === 0) return NextResponse.json({ error: "not_found" }, { status: 404 });
     const row = dres.rows[0];
     if (row.verified) return NextResponse.json({ verified: true });
 
-    const host = `_better404.${row.name}`;
+    // Domain name in DB may include a subpath; TXT verification is host-only
+    const inputUrl = row.name.includes("://") ? row.name : `https://${row.name}`;
+    const { domain: hostOnly } = extractDomainAndPath(inputUrl);
+    const host = `_better404.${hostOnly}`;
     const txts = await lookupTxt(host);
     if (!txts || !txts.includes(row.site_key_public)) {
       return NextResponse.json({ verified: false, reason: "txt_record_not_found" }, { status: 400 });
     }
 
-    await query("UPDATE domains SET verified = true, updated_at = NOW() WHERE id = $1", [row.id]);
-    return NextResponse.json({ verified: true });
+    const shouldScrape = (!row.last_scraped_at || (Date.now() - new Date(row.last_scraped_at).getTime()) > 24 * 60 * 60 * 1000);
+
+    if (shouldScrape) {
+      await query("UPDATE domains SET verified = true, last_scraped_at = NOW(), updated_at = NOW() WHERE id = $1", [row.id]);
+      // Kick off scrape from stored name (may include path)
+      startKernelScrape(row.name).catch(() => {});
+    } else {
+      await query("UPDATE domains SET verified = true, updated_at = NOW() WHERE id = $1", [row.id]);
+    }
+    return NextResponse.json({ verified: true, started: shouldScrape });
   } catch {
     return NextResponse.json({ error: "server_error" }, { status: 500 });
   }

@@ -82,10 +82,21 @@ export default function Home() {
         setDomainId(data.id || null);
         setSiteKey(data.siteKeyPublic || null);
         setVerified(data.verified || false);
-        
-        // If it's verified, get snippets
-        if (data.verified && data.snippets) {
-          setSnippets(data.snippets);
+
+        // Always attempt verification right after registering/updating
+        if (data?.id) {
+          try {
+            const vres = await fetch(`/api/v1/domains/${data.id}/verify`, { method: "POST" });
+            const vdata = await vres.json();
+            const verifiedNow = vres.ok && (vdata.verified === true || vdata.ok === true);
+            setVerified(verifiedNow);
+            if (verifiedNow && data.siteKeyPublic) {
+              const snippets = buildSnippet(data.siteKeyPublic);
+              setSnippets(snippets);
+            }
+          } catch {
+            // ignore; user can retry with Check verification
+          }
         }
       }
     } catch (err: unknown) {
@@ -145,12 +156,10 @@ export default function Home() {
         />
         <button type="submit" disabled={loading} className={styles.button}>
           {loading 
-            ? "Checking..." 
+            ? "Verifying..." 
             : domainStatus?.verified 
               ? "Get Snippet" 
-              : domainStatus === null 
-                ? "Get Started" 
-                : "Verify Domain"
+              : "Verify & Get Snippet"
           }
         </button>
       </form>
@@ -192,7 +201,7 @@ export default function Home() {
       )}
       {siteKey && domain && !verified && (
         <div className={styles.verifySection}>
-          <h3 className={styles.verifyTitle}>Verify your domain</h3>
+          <h3 className={styles.verifyTitle}>Check verification</h3>
           <ol className={styles.verifySteps}>
             <li>Add a DNS TXT record:</li>
           </ol>

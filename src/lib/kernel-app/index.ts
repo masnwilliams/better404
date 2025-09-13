@@ -26,14 +26,15 @@ async function fetchText(url: string): Promise<string | null> {
 }
 
 async function robotsSitemaps(baseUrl: string): Promise<string[]> {
-  const robotsUrl = new URL('/robots.txt', baseUrl).toString();
+  // Treat the provided URL (including subpath) as the root; only check that prefix's robots.txt
+  const robotsUrl = new URL('robots.txt', ensureTrailingSlash(baseUrl)).toString();
   const text = await fetchText(robotsUrl);
   if (!text) return [];
   const out: string[] = [];
   for (const line of text.split(/\r?\n/)) {
     const m = line.match(/^\s*Sitemap:\s*(\S+)/i);
     if (m) {
-      try { out.push(new URL(m[1], baseUrl).toString()); } catch {}
+      try { out.push(new URL(m[1], robotsUrl).toString()); } catch {}
     }
   }
   return out;
@@ -45,7 +46,7 @@ function extractLocs(xml: string): string[] {
   return locs;
 }
 
-async function crawlSitemapRecursive(startUrl: string, sameHost: string, visited = new Set<string>(), depth = 0, maxDepth = 3, pageLimit = 10000): Promise<Set<string>> {
+async function crawlSitemapRecursive(startUrl: string, sameHost: string, visited = new Set<string>(), depth = 0, maxDepth = 3, pageLimit = 10000, pathPrefix: string = '/'): Promise<Set<string>> {
   const pages = new Set<string>();
   if (depth > maxDepth || visited.has(startUrl)) return pages;
   visited.add(startUrl);
@@ -59,10 +60,11 @@ async function crawlSitemapRecursive(startUrl: string, sameHost: string, visited
     try { abs = new URL(loc, startUrl); } catch { continue; }
     const host = normalizeDomain(abs.hostname);
     if (host !== sameHost) continue;
+    if (!abs.pathname.startsWith(pathPrefix)) continue;
     const href = abs.toString();
     if (lower.includes('<sitemapindex')) {
       // loc points to a child sitemap; recurse
-      const childPages = await crawlSitemapRecursive(href, sameHost, visited, depth + 1, maxDepth, pageLimit - pages.size);
+      const childPages = await crawlSitemapRecursive(href, sameHost, visited, depth + 1, maxDepth, pageLimit - pages.size, pathPrefix);
       childPages.forEach(u => pages.add(u));
     } else if (lower.includes('<urlset')) {
       // loc points to a page URL (from a regular sitemap)
@@ -77,7 +79,8 @@ async function crawlSitemapRecursive(startUrl: string, sameHost: string, visited
           for (const cl of childLocs) {
             const cu = new URL(cl, href);
             if (normalizeDomain(cu.hostname) !== sameHost) continue;
-            const nested = await crawlSitemapRecursive(cu.toString(), sameHost, visited, depth + 1, maxDepth, pageLimit - pages.size);
+            if (!cu.pathname.startsWith(pathPrefix)) continue;
+            const nested = await crawlSitemapRecursive(cu.toString(), sameHost, visited, depth + 1, maxDepth, pageLimit - pages.size, pathPrefix);
             nested.forEach(u => pages.add(u));
             if (pages.size >= pageLimit) break;
           }
@@ -86,6 +89,7 @@ async function crawlSitemapRecursive(startUrl: string, sameHost: string, visited
           for (const ul of urlLocs) {
             const uu = new URL(ul, href);
             if (normalizeDomain(uu.hostname) !== sameHost) continue;
+            if (!uu.pathname.startsWith(pathPrefix)) continue;
             pages.add(uu.toString());
             if (pages.size >= pageLimit) break;
           }
@@ -96,31 +100,43 @@ async function crawlSitemapRecursive(startUrl: string, sameHost: string, visited
   return pages;
 }
 
+function ensureTrailingSlash(u: string): string {
+  try {
+    const url = new URL(u);
+    if (!url.pathname.endsWith('/')) url.pathname = url.pathname + '/';
+    return url.toString();
+  } catch { return u.endsWith('/') ? u : `${u}/`; }
+}
+
 async function discoverUrls(domain: string): Promise<string[]> {
-  const base = `https://${domain}`;
-  const sameHost = normalizeDomain(new URL(base).hostname);
-  // Seed sitemap URLs: common candidates + robots.txt entries
-  const candidates = [
-    new URL('/sitemap.xml', base).toString(),
-    new URL('/sitemap_index.xml', base).toString(),
-    new URL('/sitemap-index.xml', base).toString(),
-    new URL('/sitemap1.xml', base).toString(),
-  ];
-  const robotMaps = await robotsSitemaps(base);
+  // Allow domain to include a subpath (e.g., example.com/docs). Treat that as the root prefix.
+  const baseStr = domain.startsWith('http://') || domain.startsWith('https://') ? domain : `https://${domain}`;
+  const baseUrl = new URL(ensureTrailingSlash(baseStr));
+  const sameHost = normalizeDomain(baseUrl.hostname);
+  const pathPrefix = baseUrl.pathname; // with trailing slash
+
+  // Seed sitemap URLs: only probe subpath-level sitemaps relative to the provided root
+  const names = ['sitemap.xml', 'sitemap_index.xml', 'sitemap-index.xml', 'sitemap1.xml'];
+  const candidates: string[] = [];
+  for (const name of names) {
+    candidates.push(new URL(name, baseUrl).toString()); // subpath only
+  }
+
+  // Gather sitemaps from robots.txt at both root and subpath
+  const robotMaps = await robotsSitemaps(baseUrl.toString());
   const startSitemaps = Array.from(new Set([...candidates, ...robotMaps]));
 
   const visited = new Set<string>();
   const pages = new Set<string>();
   const MAX_URLS = 1000; // Cap total URLs per domain
   for (const sm of startSitemaps) {
-    const found = await crawlSitemapRecursive(sm, sameHost, visited, 0, 3, MAX_URLS);
+    const found = await crawlSitemapRecursive(sm, sameHost, visited, 0, 3, MAX_URLS, pathPrefix);
     found.forEach(u => pages.add(u));
-    if (pages.size >= 1) break; // if we found any, we can proceed; remove this break to collect all
     if (pages.size >= MAX_URLS) break; // Stop if we hit the cap
   }
   if (pages.size > 0) return Array.from(pages).slice(0, MAX_URLS);
-  // Fallback: just seed with homepage if no sitemap
-  return [base];
+  // Fallback: just seed with provided base as homepage for that prefix
+  return [baseUrl.toString()];
 }
 
 function chunkText(text: string, size = 800, overlap = 200): string[] {
