@@ -92,8 +92,7 @@ Deploy your own instance for full control:
 3. **Set up the database**:
    ```bash
    # Run the migrations to create tables and enable pgvector
-   psql $DATABASE_URL -f migrations/001_init.sql
-   psql $DATABASE_URL -f migrations/002_add_last_scraped_at.sql
+   bun run db:migrate
    ```
 
 4. **Deploy the Kernel app** (required for crawling):

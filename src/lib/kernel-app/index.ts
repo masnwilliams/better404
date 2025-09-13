@@ -4,11 +4,12 @@ import OpenAI from 'openai';
 import { Pool } from 'pg';
 
 const kernel = new Kernel();
-const app = kernel.app('better404');
+const APP_NAME = process.env.APP_NAME || 'better404';
+const app = kernel.app(APP_NAME);
 
 // ----- Input/Output types -----
-type CrawlInput = { domain: string };
-type CrawlOutput = { ok: boolean; discovered: number };
+type CrawlInput = { domain: string; shardIndex?: number; shardCount?: number };
+type CrawlOutput = { ok: boolean; discovered: number; totalUrls?: number; shardIndex?: number; shardCount?: number };
 
 // ----- Helpers -----
 function normalizeDomain(hostname: string): string {
@@ -110,12 +111,14 @@ async function discoverUrls(domain: string): Promise<string[]> {
 
   const visited = new Set<string>();
   const pages = new Set<string>();
+  const MAX_URLS = 1000; // Cap total URLs per domain
   for (const sm of startSitemaps) {
-    const found = await crawlSitemapRecursive(sm, sameHost, visited, 0, 3, 10000);
+    const found = await crawlSitemapRecursive(sm, sameHost, visited, 0, 3, MAX_URLS);
     found.forEach(u => pages.add(u));
     if (pages.size >= 1) break; // if we found any, we can proceed; remove this break to collect all
+    if (pages.size >= MAX_URLS) break; // Stop if we hit the cap
   }
-  if (pages.size > 0) return Array.from(pages);
+  if (pages.size > 0) return Array.from(pages).slice(0, MAX_URLS);
   // Fallback: just seed with homepage if no sitemap
   return [base];
 }
@@ -144,6 +147,10 @@ app.action<CrawlInput, CrawlOutput>('crawl-domain', async (_ctx: KernelContext, 
     console.log(`[crawl] start domain=${domain}`);
     const urls = await discoverUrls(domain);
     console.log(`[crawl] discovered urls=${urls.length}`);
+    const shardCount = Math.max(1, Number(payload?.shardCount || 1));
+    const shardIndex = Math.min(Math.max(0, Number(payload?.shardIndex || 0)), Math.max(0, shardCount - 1));
+    const selected = shardCount > 1 ? urls.filter((_, i) => (i % shardCount) === shardIndex) : urls;
+    console.log(`[crawl] shardIndex=${shardIndex} shardCount=${shardCount} selected=${selected.length}`);
     let discovered = 0;
 
     const browserSession = await kernel.browsers.create({ stealth: true });
@@ -155,7 +162,7 @@ app.action<CrawlInput, CrawlOutput>('crawl-domain', async (_ctx: KernelContext, 
     const openai = process.env.OPENAI_API_KEY ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY }) : null;
     console.log(`[crawl] openai=${openai ? 'on' : 'off'}`);
 
-    for (const url of urls) {
+    for (const url of selected) {
       // Sequentially visit each URL
       try {
         console.log(`[crawl] nav ${url}`);

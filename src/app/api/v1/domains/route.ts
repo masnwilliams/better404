@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import { startKernelScrape, buildSnippet } from "@/lib/kernel";
+import { buildSnippet } from "@/lib/kernel";
+import { startKernelScrape } from "@/lib/kernel-server";
 import { normalizeDomain } from "@/lib/urls";
 
 function randomId(len = 24) {
