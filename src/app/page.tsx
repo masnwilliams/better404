@@ -10,8 +10,8 @@ import styles from "./page.module.css";
 export default function Home() {
   const [domain, setDomain] = useState("");
   const [loading, setLoading] = useState(false);
-  const [snippets, setSnippets] = useState<{ html: string; react: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<'html' | 'react'>('react');
+  const [snippets, setSnippets] = useState<{ html: string; react: string; api: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<'html' | 'react' | 'api'>('react');
   const [error, setError] = useState<string | null>(null);
   const [domainId, setDomainId] = useState<number | null>(null);
   const [siteKey, setSiteKey] = useState<string | null>(null);
@@ -272,27 +272,36 @@ Value:   ${siteKey}`}
               >
                 HTML
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('api')}
+                className={`${styles.tab} ${activeTab === 'api' ? styles.tabActive : ''}`}
+              >
+                API
+              </button>
             </div>
           </div>
           
           <p className={styles.tabDescription}>
             {activeTab === 'html' 
               ? "HTML snippet: Copy and paste directly into your 404 page HTML" 
-              : "React component: Import and use in your React 404 page"
+              : activeTab === 'react'
+                ? "React component: Import and use in your React 404 page"
+                : "API request: Make the request yourself and handle the data however you want"
             }
           </p>
           
           <div className={styles.textareaContainer}>
             <textarea 
               readOnly 
-              value={activeTab === 'html' ? snippets.html : snippets.react} 
+              value={activeTab === 'html' ? snippets.html : activeTab === 'react' ? snippets.react : snippets.api} 
               className={styles.textarea}
             />
             <button
               type="button"
               onClick={async () => {
                 try {
-                  const textToCopy = activeTab === 'html' ? snippets.html : snippets.react;
+                  const textToCopy = activeTab === 'html' ? snippets.html : activeTab === 'react' ? snippets.react : snippets.api;
                   await navigator.clipboard.writeText(textToCopy);
                   setCopied(true);
                   setTimeout(() => setCopied(false), 2000);

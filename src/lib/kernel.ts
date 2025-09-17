@@ -1,4 +1,4 @@
-export function buildSnippet(siteKeyPublic: string): { html: string; react: string } {
+export function buildSnippet(siteKeyPublic: string): { html: string; react: string; api: string } {
   const apiBase = (process.env.APP_BASE_URL || "").replace(/\/$/, "");
   const recUrl = `${apiBase}/api/v1/recommendations`;
   
@@ -210,7 +210,36 @@ export function Better404({ siteKey }: { siteKey: string }) {
 
 // Usage: <Better404 siteKey="${siteKeyPublic}" />`;
 
-  return { html: htmlSnippet, react: reactSnippet };
+  const apiSnippet = `// API Request Details
+const apiUrl = "${recUrl}";
+const siteKey = "${siteKeyPublic}";
+
+// Example request
+const response = await fetch(apiUrl, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    siteKey: siteKey,
+    url: window.location.href, // or your current URL
+    referrer: document.referrer || undefined,
+    topN: 5
+  })
+});
+
+const data = await response.json();
+// data.results contains array of recommendations:
+// [
+//   {
+//     url: string,
+//     title: string | null,
+//     snippet: string | null,
+//     score: number
+//   }
+// ]`;
+
+  return { html: htmlSnippet, react: reactSnippet, api: apiSnippet };
 }
 
 
