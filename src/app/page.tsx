@@ -367,7 +367,7 @@ Value:   ${siteKey}`}
           fontSize: "14px",
           lineHeight: "1.5"
         }}>
-           <strong>How it works:</strong> Enter your domain, verify ownership with a DNS record, and we'll crawl your site to create a searchable index. Then paste the snippet we provide into your 404 page - when someone hits a broken link, they see relevant pages from your site instead of "Page Not Found".
+           <strong>How it works:</strong> {`Enter your domain, verify ownership with a DNS record, and we'll crawl your site to create a searchable index. Then paste the snippet we provide into your 404 page - when someone hits a broken link, they see relevant pages from your site instead of "Page Not Found".`}
         </div>
         
         <div className={styles.socialLinks}>

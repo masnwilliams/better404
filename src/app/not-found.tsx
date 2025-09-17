@@ -1,7 +1,7 @@
 "use client";
 
 import { siGithub, siX } from "simple-icons";
-import { Better404 } from "./components/Better404";
+// import { Better404 } from "./components/Better404";
 import Link from "next/link";
 
 export default function NotFound() {
