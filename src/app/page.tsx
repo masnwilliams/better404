@@ -144,7 +144,8 @@ export default function Home() {
   return (
     <main className={styles.container}>
       <h1>Better404</h1>
-      <p>Enter your domain to kick off indexing and get your 404 snippet.</p>
+      <p>Turn your 404 pages into helpful search results. Enter your domain to get started.</p>
+      
       <form onSubmit={submit} className={styles.form}>
         <input
           type="text"
@@ -357,6 +358,18 @@ Value:   ${siteKey}`}
       
       {/* Social links */}
       <div className={styles.socialSection}>
+        <div style={{ 
+          background: "rgba(255,255,255,0.05)", 
+          border: "1px solid rgba(255,255,255,0.1)", 
+          borderRadius: "8px", 
+          padding: "16px", 
+          margin: "16px 0",
+          fontSize: "14px",
+          lineHeight: "1.5"
+        }}>
+           <strong>How it works:</strong> Enter your domain, verify ownership with a DNS record, and we'll crawl your site to create a searchable index. Then paste the snippet we provide into your 404 page - when someone hits a broken link, they see relevant pages from your site instead of "Page Not Found".
+        </div>
+        
         <div className={styles.socialLinks}>
           <a
             href="https://github.com/masnwilliams/better404"

@@ -1,37 +1,60 @@
 # Better404
 
-A minimal Next.js application that provides intelligent 404 page recommendations by leveraging semantic search and vector embeddings. Instead of showing dead-end 404 pages, it suggests relevant on-site content to help users find what they're looking for.
+Turn your 404 pages into helpful search results. Instead of dead-end 404s, show users relevant pages from your site using AI-powered semantic search.
 
-## Two Ways to Use Better404
+## What is Better404?
 
-### 🌐 Hosted Service
-Visit [better404.dev](https://better404.dev) to get started instantly:
-1. Enter your domain
-2. Verify ownership with a DNS record
-3. Copy the snippet to your 404 page
-4. Done! Your site will be automatically crawled and indexed
-
-**Benefits**: Zero setup, automatic updates, managed infrastructure, no maintenance
-
-### 🛠️ Self-Hosted
-Deploy your own instance for full control:
-- **Requires**: [Kernel API key](https://dashboard.onkernel.com/api-keys), OpenAI API key, PostgreSQL with pgvector, hosting platform
-
-## Features
-
-- **Smart 404 Recommendations**: Show relevant pages instead of dead-end 404s
-- **Semantic Search**: Uses vector embeddings for intelligent content matching
-- **Easy Integration**: Simple JavaScript snippet for any website
-- **Direct Crawling**: Uses [Kernel](https://onkernel.com) browsers to crawl and vectorize sites directly
-- **PostgreSQL + pgvector**: Efficient vector similarity search
-- **OpenAI Embeddings**: High-quality semantic understanding
+Better404 solves the problem of broken links and missing pages by:
+- **Crawling your entire site** and creating a searchable index
+- **Using AI to understand content** and find relevant matches
+- **Providing a simple snippet** you paste into your 404 page
+- **Showing helpful suggestions** instead of "Page Not Found"
 
 ## How It Works
 
-1. **Content Ingestion**: Your website content is crawled and vectorized using [Kernel](https://onkernel.com) browsers
-2. **Vector Storage**: Content chunks and embeddings are stored in PostgreSQL with pgvector
-3. **Smart Recommendations**: When a 404 occurs, the system performs semantic search to find relevant pages
-4. **User Experience**: A simple snippet displays helpful suggestions instead of a dead-end page
+1. **Enter your domain** on [better404.dev](https://better404.dev)
+2. **Verify ownership** with a DNS record (takes 2 minutes)
+3. **Copy the snippet** to your 404 page
+4. **Done!** Your site gets automatically crawled and indexed
+
+When someone hits a 404, they see relevant pages from your site instead of a dead end.
+
+## Two Ways to Use
+
+### 🌐 Hosted Service (Recommended)
+- **Free and open source**
+- **Zero setup** - just paste a snippet
+- **Automatic updates** when you add new content
+- **No maintenance** required
+
+### 🛠️ Self-Hosted
+For full control over your data and infrastructure:
+- **Requires**: [Kernel API key](https://dashboard.onkernel.com/api-keys), OpenAI API key, PostgreSQL with pgvector
+
+## Key Features
+
+- **Free & Open Source** - No cost, full source code available
+- **Works on Any Site** - Just paste a snippet, no complex setup
+- **AI-Powered Search** - Uses semantic search to find relevant content
+- **Automatic Updates** - Re-crawls your site when content changes
+- **No Analytics/Stats** - We just provide the recommendations, you handle tracking
+- **Not Monetized** - Completely free service
+
+## How It Works
+
+1. **We crawl your site** - Uses [Kernel](https://onkernel.com) browsers to visit every page
+2. **We index the content** - Creates a searchable database of your pages
+3. **We provide recommendations** - When someone hits a 404, we find relevant pages
+4. **You show the results** - Simple snippet displays helpful suggestions
+
+## What You Get
+
+- **A simple snippet** to paste into your 404 page
+- **Automatic crawling** of your entire site
+- **AI-powered recommendations** when users hit broken links
+- **No setup required** - just verify domain ownership
+- **No analytics** - you can add your own tracking to the links
+- **Completely free** - no monetization, no paid tiers
 
 ## Architecture
 
@@ -41,8 +64,6 @@ Deploy your own instance for full control:
 - **Crawling**: [Kernel](https://onkernel.com) browsers for direct web scraping and content vectorization
 
 ## Quick Start
-
-### Option 1: Use the Hosted Service (Easiest)
 
 1. **Visit [better404.dev](https://better404.dev)**
 2. **Enter your domain** (e.g., `example.com`)
@@ -54,7 +75,7 @@ Deploy your own instance for full control:
    ```
 4. **Verify ownership** by clicking "Check verification"
 5. **Copy the snippet** and paste it into your 404 page
-6. **Done!** Your site will be automatically crawled and indexed
+6. **Done!** Your site gets automatically crawled and indexed
 
 ### Option 2: Self-Hosted Deployment
 
