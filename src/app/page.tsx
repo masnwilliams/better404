@@ -142,77 +142,199 @@ export default function Home() {
   }, [domain]);
 
   return (
-    <main className={styles.container}>
-      <h1>Better404</h1>
-      <p>Turn your 404 pages into helpful search results. Enter your domain to get started.</p>
-      
-      <form onSubmit={submit} className={styles.form}>
-        <input
-          type="text"
-          placeholder="example.com"
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-          className={styles.input}
-          required
-        />
-        <button type="submit" disabled={loading} className={styles.button}>
-          {loading 
-            ? "Verifying..." 
-            : domainStatus?.verified 
-              ? "Get Snippet" 
-              : "Verify & Get Snippet"
-          }
-        </button>
-      </form>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 12 }}>
-        <p className={styles.statusText}>
-          {domain && (checkingStatus 
-            ? "Checking status..." 
-            : domainStatus?.verified 
-              ? "✓ Domain verified - ready for snippets" 
-              : domainStatus 
-                ? "Domain registered - needs verification" 
-                : ""
-          )}
+    <main style={{ 
+      padding: "40px 20px", 
+      maxWidth: 600, 
+      margin: "0 auto", 
+      color: "#e8e8e8", 
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
+      <div style={{ width: "100%" }}>
+      <div style={{ textAlign: "center", marginBottom: 48, width: "100%" }}>
+        <h1 style={{ 
+          fontSize: "3.5rem", 
+          margin: "0 0 16px 0", 
+          color: "#ffffff",
+          fontWeight: "bold",
+          letterSpacing: "-0.02em"
+        }}>Better404</h1>
+        <p style={{ 
+          opacity: 0.8, 
+          fontSize: "1.25rem",
+          lineHeight: "1.6",
+          margin: "0 0 32px",
+          maxWidth: "480px",
+          marginLeft: "auto",
+          marginRight: "auto"
+        }}>
+          Turn your 404 pages into helpful search results. Enter your domain to get started.
         </p>
-        <a
-          href="https://onkernel.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.poweredBy}
-        >
-          <span style={{ lineHeight: 1, verticalAlign: "bottom" }}>powered by</span>
-          <Image 
-            src={isDarkMode ? "/kernel_logo_light.svg" : "/kernel_logo_dark.svg"} 
-            alt="Kernel" 
-            height={16}
-            width={70}
-            className={styles.logo}
+        
+        <form onSubmit={submit} className={styles.form}>
+          <input
+            type="text"
+            placeholder="example.com"
+            value={domain}
+            onChange={(e) => setDomain(e.target.value)}
+            className={styles.input}
+            required
           />
-        </a>
+          <button type="submit" disabled={loading} className={styles.button}>
+            {loading 
+              ? "Verifying..." 
+              : domainStatus?.verified 
+                ? "Get Snippet" 
+                : "Verify & Get Snippet"
+            }
+          </button>
+        </form>
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "center",
+          marginTop: "16px",
+          width: "100%",
+          maxWidth: "400px",
+          marginLeft: "auto",
+          marginRight: "auto"
+        }}>
+          <p style={{
+            margin: 0,
+            fontSize: "14px",
+            opacity: 0.8,
+            color: "#e8e8e8"
+          }}>
+            {domain && (checkingStatus 
+              ? "Checking status..." 
+              : domainStatus?.verified 
+                ? "✓ Domain verified - ready for snippets" 
+                : domainStatus 
+                  ? "Domain registered - needs verification" 
+                  : ""
+            )}
+          </p>
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "flex-end",
+            width: "100%"
+          }}>
+            <a
+              href="https://onkernel.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "13px",
+                opacity: 0.7,
+                textDecoration: "none",
+                color: "#e8e8e8",
+                transition: "opacity 0.2s ease"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = "1"}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = "0.7"}
+            >
+              <span style={{ lineHeight: 1, verticalAlign: "bottom" }}>powered by</span>
+              <Image 
+                src={isDarkMode ? "/kernel_logo_light.svg" : "/kernel_logo_dark.svg"} 
+                alt="Kernel" 
+                height={16}
+                width={70}
+                style={{ flexShrink: 0 }}
+              />
+            </a>
+          </div>
+        </div>
       </div>
-      {error && <p className={styles.error}>{error}</p>}
+      {error && (
+        <div style={{
+          background: "rgba(255, 99, 99, 0.1)",
+          border: "1px solid rgba(255, 99, 99, 0.3)",
+          borderRadius: "8px",
+          padding: "12px 16px",
+          margin: "16px 0",
+          color: "#ff6b6b",
+          fontSize: "14px",
+          textAlign: "center"
+        }}>
+          {error}
+        </div>
+      )}
       {!verified && siteKey && (
-        <div className={styles.warningCard}>
-          <h3 className={styles.warningTitle}>Domain Not Verified</h3>
-          <p className={styles.warningText}>
+        <div style={{
+          background: "rgba(255, 193, 7, 0.1)",
+          border: "1px solid rgba(255, 193, 7, 0.3)",
+          borderRadius: "8px",
+          padding: "16px",
+          margin: "16px 0",
+          textAlign: "center"
+        }}>
+          <h3 style={{ 
+            margin: "0 0 8px 0", 
+            color: "#ffc107",
+            fontSize: "16px",
+            fontWeight: "600"
+          }}>Domain Not Verified</h3>
+          <p style={{ 
+            margin: 0, 
+            opacity: 0.9, 
+            color: "#e8e8e8",
+            fontSize: "14px"
+          }}>
             You need to verify domain ownership before getting your snippet. Add the DNS record below and click Check Verification.
           </p>
         </div>
       )}
       {siteKey && domain && !verified && (
-        <div className={styles.verifySection}>
-          <h3 className={styles.verifyTitle}>Check verification</h3>
-          <ol className={styles.verifySteps}>
-            <li>Add a DNS TXT record:</li>
-          </ol>
-          <pre className={styles.codeBlock}>
+        <div style={{
+          marginTop: "24px",
+          borderTop: "1px solid rgba(255,255,255,0.1)",
+          paddingTop: "20px",
+          textAlign: "center"
+        }}>
+          <h3 style={{ 
+            margin: "0 0 16px 0", 
+            color: "#ffffff",
+            fontSize: "18px",
+            fontWeight: "600"
+          }}>Check verification</h3>
+          <div style={{ marginBottom: "16px" }}>
+            <p style={{ margin: "0 0 8px 0", color: "#e8e8e8" }}>Add a DNS TXT record:</p>
+            <pre style={{
+              background: "rgba(0,0,0,0.3)",
+              color: "#ffffff",
+              padding: "16px",
+              borderRadius: "8px",
+              overflowX: "auto",
+              fontFamily: "monospace",
+              fontSize: "13px",
+              margin: "0 auto",
+              maxWidth: "300px",
+              textAlign: "left"
+            }}>
 {`Host:    _better404
 Type:    TXT
 Value:   ${siteKey}`}
-          </pre>
-          <p className={styles.propagationNote}>Propagation can take a few minutes.</p>
-          <div className={styles.verifyActions}>
+            </pre>
+            <p style={{ 
+              margin: "8px 0 0", 
+              opacity: 0.7, 
+              color: "#e8e8e8",
+              fontSize: "13px"
+            }}>Propagation can take a few minutes.</p>
+          </div>
+          <div style={{ 
+            display: "flex", 
+            gap: "12px", 
+            alignItems: "center", 
+            justifyContent: "center",
+            flexWrap: "wrap"
+          }}>
             <button
               type="button"
               onClick={async () => {
@@ -237,11 +359,37 @@ Value:   ${siteKey}`}
                 }
               }}
               disabled={verifyLoading}
-              className={styles.verifyButton}
+              style={{
+                padding: "10px 20px",
+                fontSize: "14px",
+                background: verifyLoading ? "rgba(255,255,255,0.2)" : "#4CAF50",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                cursor: verifyLoading ? "not-allowed" : "pointer",
+                transition: "all 0.2s ease",
+                fontWeight: "500"
+              }}
+              onMouseEnter={(e) => {
+                if (!verifyLoading) {
+                  e.currentTarget.style.background = "#45a049";
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!verifyLoading) {
+                  e.currentTarget.style.background = "#4CAF50";
+                  e.currentTarget.style.transform = "translateY(0)";
+                }
+              }}
             >
               {verifyLoading ? "Checking..." : "Check verification"}
             </button>
-            <span className={`${styles.verifyStatus} ${verified ? '' : 'error'}`}>
+            <span style={{ 
+              color: verified ? "#4CAF50" : "#ff6b6b",
+              fontSize: "14px",
+              fontWeight: "500"
+            }}>
               {verified ? "✓ Verified!" : "Not verified yet"}
             </span>
           </div>
@@ -356,26 +504,87 @@ Value:   ${siteKey}`}
         </div>
       )}
       
-      {/* Social links */}
-      <div className={styles.socialSection}>
+        {/* How it works section */}
         <div style={{ 
           background: "rgba(255,255,255,0.05)", 
           border: "1px solid rgba(255,255,255,0.1)", 
           borderRadius: "8px", 
-          padding: "16px", 
-          margin: "16px 0",
+          padding: "20px", 
+          margin: "32px 0",
           fontSize: "14px",
-          lineHeight: "1.5"
+          lineHeight: "1.6",
+          textAlign: "left"
         }}>
-           <strong>How it works:</strong> {`Enter your domain, verify ownership with a DNS record, and we'll crawl your site to create a searchable index. Then paste the snippet we provide into your 404 page - when someone hits a broken link, they see relevant pages from your site instead of "Page Not Found".`}
+          <h3 style={{ 
+            margin: "0 0 16px 0", 
+            color: "#ffffff",
+            fontSize: "16px",
+            fontWeight: "600",
+            textAlign: "center"
+          }}>How it works:</h3>
+          <ol style={{ 
+            margin: 0, 
+            paddingLeft: "20px",
+            color: "#e8e8e8"
+          }}>
+            <li style={{ marginBottom: "8px" }}>
+              <strong>Enter your domain</strong> in the form above
+            </li>
+            <li style={{ marginBottom: "8px" }}>
+              <strong>Verify ownership</strong> with a DNS record
+            </li>
+            <li style={{ marginBottom: "8px" }}>
+              <strong>We crawl your site</strong> to create a searchable index
+            </li>
+            <li style={{ marginBottom: "8px" }}>
+              <strong>Paste our snippet</strong> into your 404 page
+            </li>
+            <li>
+              <strong>Users see relevant pages</strong> instead of {`"Page Not Found"`}
+            </li>
+          </ol>
         </div>
-        
-        <div className={styles.socialLinks}>
+      </div>
+      
+      {/* Social links */}
+      <div style={{ 
+        marginTop: "auto",
+        paddingTop: "32px", 
+        borderTop: "1px solid rgba(255,255,255,0.1)", 
+        textAlign: "center",
+        width: "100%"
+      }}>
+        <div style={{ 
+          display: "flex", 
+          gap: "32px", 
+          justifyContent: "center", 
+          flexWrap: "wrap",
+          alignItems: "center"
+        }}>
           <a
             href="https://github.com/masnwilliams/better404"
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.socialLink}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              color: "rgba(255,255,255,0.6)",
+              textDecoration: "none",
+              fontSize: "0.875rem",
+              fontWeight: "500",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              transition: "all 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "rgba(255,255,255,0.6)";
+              e.currentTarget.style.background = "transparent";
+            }}
           >
             <svg
               width="18"
@@ -386,12 +595,32 @@ Value:   ${siteKey}`}
             >
               <path d={siGithub.path} />
             </svg>
+            <span>GitHub</span>
           </a>
           <a
             href="https://x.com/masnwilliams"
             target="_blank"
             rel="noopener noreferrer"
-            className={styles.socialLink}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              color: "rgba(255,255,255,0.6)",
+              textDecoration: "none",
+              fontSize: "0.875rem",
+              fontWeight: "500",
+              padding: "8px 12px",
+              borderRadius: "6px",
+              transition: "all 0.2s ease"
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "rgba(255,255,255,0.6)";
+              e.currentTarget.style.background = "transparent";
+            }}
           >
             <svg
               width="18"
@@ -402,6 +631,7 @@ Value:   ${siteKey}`}
             >
               <path d={siX.path} />
             </svg>
+            <span>@masnwilliams</span>
           </a>
         </div>
       </div>
