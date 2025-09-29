@@ -598,7 +598,7 @@ Value:   ${siteKey}`}
             <span>GitHub</span>
           </a>
           <a
-            href="https://x.com/masnwilliams"
+            href="https://x.com/masnwilliams/status/1966255813196132811"
             target="_blank"
             rel="noopener noreferrer"
             style={{
