@@ -595,7 +595,6 @@ Value:   ${siteKey}`}
             >
               <path d={siGithub.path} />
             </svg>
-            <span>GitHub</span>
           </a>
           <a
             href="https://x.com/masnwilliams/status/1966255813196132811"
@@ -631,7 +630,6 @@ Value:   ${siteKey}`}
             >
               <path d={siX.path} />
             </svg>
-            <span>@masnwilliams</span>
           </a>
         </div>
       </div>
